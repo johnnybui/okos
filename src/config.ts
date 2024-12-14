@@ -26,6 +26,6 @@ export const summarizeModel = new ChatOllama({
 });
 
 export const CHAT_CONFIG = {
-  maxMessagesBeforeSummary: 10, // Number of messages before triggering summary
-  messagesToKeep: 10, // Number of recent messages to keep in context
+  maxMessagesBeforeSummary: 6, // Number of messages before triggering summary
+  messagesToKeep: 6, // Number of recent messages to keep in context
 } as const;
