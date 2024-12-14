@@ -6,6 +6,9 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - OLLAMA_API_URL=http://ollama:11434
+      - PORT=11435
+    ports:
+      - '11435:11435'
     depends_on:
       - redis
       - ollama
@@ -31,8 +34,6 @@ services:
     restart: unless-stopped
     networks:
       - okos-network
-    devices:
-      - /dev/dri:/dev/dri
 
 volumes:
   redis-data:

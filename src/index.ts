@@ -1,12 +1,26 @@
+import express from 'express';
 import { createChatGraph } from './graph';
 import { RedisService } from './services/redis';
 import TelegramService from './services/telegram';
+
+const app = express();
+const port = process.env.PORT || 11435;
 
 const redisService = new RedisService();
 const graph = createChatGraph();
 
 // Initialize bot using singleton
 const bot = TelegramService.getInstance();
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Start express server
+app.listen(port, () => {
+  console.log(`Health check server listening on port ${port}`);
+});
 
 bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
