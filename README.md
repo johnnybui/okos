@@ -68,6 +68,34 @@ yarn start
 yarn dev
 ```
 
+## Docker Setup
+
+You can run the entire application stack using Docker Compose:
+
+1. Build and start all services:
+```bash
+docker compose up -d
+```
+
+2. View logs:
+```bash
+docker compose logs -f
+```
+
+3. Stop services:
+```bash
+docker compose down
+```
+
+The Docker setup includes:
+- Bot service with Node.js
+- Redis for persistent storage
+- Ollama with GPU support
+- Shared network for services
+- Volume mounts for data persistence
+
+Note: Make sure you have Docker with GPU support installed if you want to use GPU acceleration for Ollama.
+
 ## Environment Variables
 
 Required:
