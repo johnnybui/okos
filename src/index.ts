@@ -13,7 +13,7 @@ const graph = createChatGraph();
 const bot = TelegramService.getInstance();
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 

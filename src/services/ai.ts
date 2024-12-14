@@ -12,7 +12,9 @@ export class AIService {
     }
 
     const conversationMessages =
-      messages.length > CHAT_CONFIG.maxMessagesBeforeSummary ? messages.slice(-CHAT_CONFIG.messagesToKeep) : messages;
+      messages.length > CHAT_CONFIG.maxMessagesBeforeSummary && lastSummary
+        ? messages.slice(-CHAT_CONFIG.messagesWithSummary)
+        : messages.slice(-CHAT_CONFIG.messagesToKeep);
 
     modelMessages = modelMessages.concat(
       conversationMessages.map((msg) =>
@@ -29,14 +31,20 @@ export class AIService {
   }
 
   static async generateSummary(messages: IChatMessage[], lastSummary?: string) {
-    const lastMessages = messages.slice(-CHAT_CONFIG.messagesToKeep);
-    const messagesForSummary = lastMessages.map((msg) => `${msg.role}: ${msg.content}`).join('\n');
-
-    const summaryResponse = await summarizeModel.invoke([
+    const modelMessages = [
       new SystemMessage(PROMPTS.SUMMARY.SYSTEM),
-      new HumanMessage(PROMPTS.SUMMARY.formatUserPrompt(lastSummary, messagesForSummary)),
-    ]);
+      ...(lastSummary ? [new SystemMessage(`Previous summary: ${lastSummary}`)] : []),
+    ];
 
-    return summaryResponse.content.toString();
+    modelMessages.push(
+      new HumanMessage(
+        messages
+          .map((msg) => `${msg.role}: ${msg.content}`)
+          .join('\n')
+      )
+    );
+
+    const response = await summarizeModel.invoke(modelMessages);
+    return response.content.toString();
   }
 }
