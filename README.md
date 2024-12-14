@@ -50,10 +50,22 @@ redis-server
 ollama run llama3.1
 ```
 
-5. Run the bot:
+5. Build the bot:
 
 ```bash
-npm start
+yarn build
+```
+
+6. Start the bot:
+
+```bash
+yarn start
+```
+
+7. For Development:
+
+```bash
+yarn dev
 ```
 
 ## Environment Variables
