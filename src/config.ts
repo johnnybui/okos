@@ -25,8 +25,6 @@ export const summarizeModel = new ChatOllama({
   maxRetries: 2,
 });
 
-export const initialSystemPrompt = `You are Okos, my AI assistant. You are a helpful assistant that can answer questions about anything.`;
-
 export const CHAT_CONFIG = {
   maxMessagesBeforeSummary: 10, // Number of messages before triggering summary
   messagesToKeep: 10, // Number of recent messages to keep in context

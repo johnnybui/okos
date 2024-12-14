@@ -1,11 +1,11 @@
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { CHAT_CONFIG, chatModel, initialSystemPrompt, summarizeModel } from '../config';
+import { CHAT_CONFIG, chatModel, summarizeModel } from '../config';
 import { PROMPTS } from '../prompts';
 import { IChatMessage } from '../types';
 
 export class AIService {
   static async generateResponse(messages: IChatMessage[], lastSummary?: string) {
-    let modelMessages = [new SystemMessage(initialSystemPrompt)];
+    let modelMessages = [new SystemMessage(PROMPTS.CHAT.SYSTEM)];
 
     if (messages.length > CHAT_CONFIG.maxMessagesBeforeSummary && lastSummary) {
       modelMessages.push(new SystemMessage(`Previous conversation summary: ${lastSummary}`));
