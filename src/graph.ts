@@ -44,11 +44,8 @@ const generateResponse = async (context: typeof ChatContext.State): Promise<ICha
   await TelegramService.sendChatAction(chatId, 'typing');
   const responseContent = await AIService.generateResponse(state.messages, state.lastSummary);
   state.messages.push({ role: 'assistant', content: responseContent });
-  
-  await Promise.all([
-    TelegramService.sendMessage(chatId, responseContent),
-    redisService.saveState(chatId, state)
-  ]);
+
+  await Promise.all([TelegramService.sendMessage(chatId, responseContent), redisService.saveState(chatId, state)]);
 
   return { state: { ...state, messages: state.messages }, chatId };
 };
@@ -56,7 +53,7 @@ const generateResponse = async (context: typeof ChatContext.State): Promise<ICha
 const generateSummary = async (context: typeof ChatContext.State): Promise<IChatContext> => {
   const { state, chatId } = context;
 
-  const shouldGenerateSummary = 
+  const shouldGenerateSummary =
     state.messages.length >= CHAT_CONFIG.maxMessagesBeforeSummary &&
     state.messages[state.messages.length - 1].role === 'assistant';
 

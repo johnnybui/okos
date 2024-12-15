@@ -14,7 +14,7 @@ class TelegramService {
 
   static async sendMessage(chatId: number, message: string): Promise<void> {
     const bot = TelegramService.getInstance();
-    await bot.sendMessage(chatId, message);
+    await bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
   }
 
   static async sendChatAction(chatId: number, action: TelegramBot.ChatAction): Promise<void> {
