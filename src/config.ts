@@ -15,7 +15,7 @@ export const OLLAMA_API_URL = process.env.OLLAMA_API_URL || 'http://localhost:11
 export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
 type ModelProvider = 'ollama' | 'google' | 'groq' | 'openai';
-const MODEL_PROVIDER = (process.env.MODEL_PROVIDER || 'ollama') as ModelProvider;
+export const MODEL_PROVIDER = (process.env.MODEL_PROVIDER || 'ollama') as ModelProvider;
 
 function createChatModel(type: 'chat' | 'summary') {
   const isChat = type === 'chat';
@@ -24,7 +24,9 @@ function createChatModel(type: 'chat' | 'summary') {
     case 'openai':
       return new ChatOpenAI({
         apiKey: process.env.OPENAI_API_KEY!,
-        modelName: process.env.OPENAI_MODEL_NAME || 'gpt-4o',
+        modelName: isChat
+          ? process.env.OPENAI_MODEL_NAME || 'gpt-4o'
+          : process.env.OPENAI_TOOL_MODEL_NAME || 'gpt-4o-mini',
         temperature: isChat ? 0.7 : 0,
         maxRetries: 2,
       });
@@ -32,7 +34,9 @@ function createChatModel(type: 'chat' | 'summary') {
     case 'google':
       return new ChatGoogleGenerativeAI({
         apiKey: process.env.GOOGLE_API_KEY!,
-        modelName: process.env.GOOGLE_MODEL_NAME || 'gemini-pro',
+        modelName: isChat
+          ? process.env.GOOGLE_MODEL_NAME || 'gemini-1.5-pro'
+          : process.env.GOOGLE_TOOL_MODEL_NAME || 'gemini-1.5-flash',
         temperature: isChat ? 0.7 : 0,
         maxRetries: 2,
       });
@@ -40,7 +44,9 @@ function createChatModel(type: 'chat' | 'summary') {
     case 'groq':
       return new ChatGroq({
         apiKey: process.env.GROQ_API_KEY!,
-        modelName: process.env.GROQ_MODEL_NAME || 'llama-3.3-70b-versatile',
+        modelName: isChat
+          ? process.env.GROQ_MODEL_NAME || 'llama-3.3-70b-versatile'
+          : process.env.GROQ_TOOL_MODEL_NAME || 'llama-3.1-8b-instant',
         temperature: isChat ? 0.7 : 0,
         maxRetries: 2,
       });
@@ -49,7 +55,7 @@ function createChatModel(type: 'chat' | 'summary') {
     default:
       return new ChatOllama({
         baseUrl: OLLAMA_API_URL,
-        model: process.env.MODEL_NAME || 'llama3.2',
+        model: isChat ? process.env.MODEL_NAME || 'llama3.2' : process.env.TOOL_MODEL_NAME || 'qwen2.5:1b',
         temperature: isChat ? 0.7 : 0,
         maxRetries: 2,
       });

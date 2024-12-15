@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import { CHAT_CONFIG } from '../config';
+import { CHAT_CONFIG, REDIS_URL } from '../config';
 import { IChatState } from '../types';
 
 export class RedisService {
@@ -7,9 +7,10 @@ export class RedisService {
   private readonly prefix = 'chat:';
   private readonly summaryPrefix = 'summary:';
   private readonly messagesPrefix = 'messages:';
+  private readonly memoryPrefix = 'memory:';
 
   constructor() {
-    this.client = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+    this.client = new Redis(process.env.REDIS_URL || REDIS_URL);
   }
 
   private getKey(chatId: number): string {
@@ -22,6 +23,10 @@ export class RedisService {
 
   private getMessagesKey(chatId: number): string {
     return `${this.messagesPrefix}${chatId}`;
+  }
+
+  private getMemoryKey(chatId: number): string {
+    return `${this.memoryPrefix}${chatId}`;
   }
 
   async saveState(chatId: number, state: IChatState): Promise<void> {
@@ -85,11 +90,22 @@ export class RedisService {
     return await this.client.get(key);
   }
 
+  async saveMemory(chatId: number, memory: string): Promise<void> {
+    const key = this.getMemoryKey(chatId);
+    await this.client.set(key, memory);
+  }
+
+  async getMemory(chatId: number): Promise<string | undefined> {
+    const key = this.getMemoryKey(chatId);
+    return await this.client.get(key) || undefined;
+  }
+
   async deleteState(chatId: number): Promise<void> {
     const key = this.getKey(chatId);
     const summaryKey = this.getSummaryKey(chatId);
     const messagesKey = this.getMessagesKey(chatId);
+    const memoryKey = this.getMemoryKey(chatId);
 
-    await Promise.all([this.client.del(key), this.client.del(summaryKey), this.client.del(messagesKey)]);
+    await Promise.all([this.client.del(key), this.client.del(summaryKey), this.client.del(messagesKey), this.client.del(memoryKey)]);
   }
 }

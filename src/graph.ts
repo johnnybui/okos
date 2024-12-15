@@ -14,15 +14,20 @@ const processUserInput = async (context: typeof ChatContext.State): Promise<ICha
     state.messages = [];
   }
 
-  const [existingMessages, existingSummary] = await Promise.all([
+  const [existingMessages, existingSummary, existingMemory] = await Promise.all([
     redisService.getMessages(chatId),
     redisService.getSummary(chatId),
+    redisService.getMemory(chatId),
   ]);
 
   state.messages = existingMessages;
 
   if (existingSummary) {
     state.lastSummary = existingSummary;
+  }
+
+  if (existingMemory) {
+    state.memory = existingMemory;
   }
 
   state.messages.push({ role: 'user', content: state.currentQuestion || '' });
@@ -33,6 +38,7 @@ const processUserInput = async (context: typeof ChatContext.State): Promise<ICha
       ...state,
       messages: state.messages,
       lastSummary: state.lastSummary,
+      memory: state.memory,
     },
     chatId,
   };
@@ -42,7 +48,7 @@ const generateResponse = async (context: typeof ChatContext.State): Promise<ICha
   const { state, chatId } = context;
 
   await TelegramService.sendChatAction(chatId, 'typing');
-  const responseContent = await AIService.generateResponse(state.messages, state.lastSummary);
+  const responseContent = await AIService.generateResponse(state.messages, state.lastSummary, state.memory);
   state.messages.push({ role: 'assistant', content: responseContent });
 
   await Promise.all([TelegramService.sendMessage(chatId, responseContent), redisService.saveState(chatId, state)]);
@@ -60,10 +66,22 @@ const generateSummary = async (context: typeof ChatContext.State): Promise<IChat
   if (shouldGenerateSummary) {
     const summary = await AIService.generateSummary(state.messages, state.lastSummary);
     await redisService.saveSummary(chatId, summary);
-    state.lastSummary = summary;
   }
 
-  return { state: { ...state, lastSummary: state.lastSummary }, chatId };
+  return { thingsDone: ['generateSummary'] };
+};
+
+const generateMemory = async (context: typeof ChatContext.State): Promise<IChatContext> => {
+  const { state, chatId } = context;
+
+  const shouldGenerateMemory = state.messages[state.messages.length - 1].role === 'assistant';
+
+  if (shouldGenerateMemory) {
+    const memory = await AIService.generateMemory(state.messages, state.memory);
+    await redisService.saveMemory(chatId, memory);
+  }
+
+  return { thingsDone: ['generateMemory'] };
 };
 
 export const createChatGraph = () => {
@@ -71,10 +89,14 @@ export const createChatGraph = () => {
     .addNode('processUserInput', processUserInput)
     .addNode('generateResponse', generateResponse)
     .addNode('generateSummary', generateSummary)
+    .addNode('generateMemory', generateMemory)
+
     .addEdge(START, 'processUserInput')
     .addEdge('processUserInput', 'generateResponse')
     .addEdge('generateResponse', 'generateSummary')
-    .addEdge('generateSummary', END);
+    .addEdge('generateResponse', 'generateMemory')
+    .addEdge('generateSummary', END)
+    .addEdge('generateMemory', END);
 
   return graph.compile();
 };
