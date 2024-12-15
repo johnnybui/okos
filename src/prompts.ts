@@ -26,7 +26,7 @@ Instructions:
    - Recurring topics or patterns
 3. Format as clear, concise bullet points
 4. Keep only truly important, long-term relevant information
-5. Exclude temporary or contextual information that belongs in the summary
+5. Exclude temporary, large generated code/response or contextual information that belongs in the summary
 6. Maximum 10 bullet points to stay focused on key information`,
 
     formatUserPrompt: (existingMemory: string | undefined, messages: string) =>
