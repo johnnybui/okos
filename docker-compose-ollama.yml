@@ -1,0 +1,45 @@
+services:
+  bot:
+    build: .
+    container_name: okos
+    env_file: .env.docker
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - OLLAMA_API_URL=http://ollama:11434
+      - PORT=11435
+      - MODEL_PROVIDER=ollama
+    ports:
+      - '11435:11435'
+    depends_on:
+      - redis
+      - ollama
+    restart: unless-stopped
+    networks:
+      - okos-network
+
+  redis:
+    image: redis
+    container_name: okos-redis
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - okos-network
+
+  ollama:
+    image: ollama/ollama
+    container_name: okos-ollama
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - okos-network
+
+volumes:
+  redis-data:
+  ollama-data:
+
+networks:
+  okos-network:
+    driver: bridge

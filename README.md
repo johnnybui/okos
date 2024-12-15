@@ -1,126 +1,123 @@
 # Okos - AI Telegram Assistant
 
-A Telegram chatbot powered by Ollama's Llama model, featuring conversation memory and intelligent summarization.
+Okos is a Telegram AI Assistant built with TypeScript, LangGraph, and multiple AI model providers. It maintains conversation context and provides summaries of interactions.
 
 ## Features
 
-- Conversational AI using Llama model
-- Persistent conversation memory using Redis
-- Intelligent conversation summarization
-- Telegram integration with typing indicators
-- Optional LangSmith integration for monitoring and debugging
+- Multiple AI model support (OpenAI, Google Gemini, Groq, Ollama)
+- Conversation context management
+- Automatic conversation summarization
+- Redis for state persistence
+- Docker support for both local and cloud deployments
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 18+ (for development only)
+- Docker and Docker Compose (for containerized deployment)
+- Telegram Bot Token from [BotFather](https://t.me/botfather)
+- API keys for chosen AI providers
 - Redis server
-- Ollama with Llama model installed
-- Telegram Bot Token
+- Ollama with Llama model installed (for Ollama model provider)
 
 ## Setup
 
-1. Install dependencies:
+1. Clone the repository
+2. Install dependencies:
 
 ```bash
 yarn install
 ```
 
-2. Configure environment variables:
+3. Copy the example environment file:
 
 ```bash
+# For local development
 cp .env.example .env
+
+# For Docker deployment
+cp .env.docker.example .env.docker
 ```
 
-Edit `.env` with your:
+4. Configure environment variables in `.env` or `.env.docker`:
 
-- Telegram Bot Token
-- Ollama API URL
+- `TELEGRAM_BOT_TOKEN`: Your Telegram bot token
+- `MODEL_PROVIDER`: Choose from 'ollama', 'google', 'groq', or 'openai'
+- Provider-specific API keys and model names
 - Redis URL
 - (Optional) LangSmith credentials for monitoring
 
-3. Start Redis:
+## Running Locally
 
-```bash
-redis-server
-```
-
-4. Start Ollama with Llama model:
-
-```bash
-ollama run llama3.1
-```
-
-5. Build the bot:
-
-```bash
-yarn build
-```
-
-6. Start the bot:
-
-```bash
-yarn start
-```
-
-7. For Development:
+Development mode with hot reload:
 
 ```bash
 yarn dev
 ```
 
-## Docker Setup
+Production mode:
 
-You can run the entire application stack using Docker Compose:
-
-1. Build and start all services:
 ```bash
-docker compose up -d
+yarn build
+yarn start
 ```
 
-2. View logs:
+## Docker Deployment
+
+Two deployment options are available:
+
+### 1. Local Deployment with Ollama
+
+Includes Ollama for local LLM inference:
+
 ```bash
-docker compose logs -f
+# Build containers
+yarn build:ollama
+
+# Start services
+yarn start:ollama
 ```
 
-3. Stop services:
+### 2. Cloud Deployment
+
+Uses cloud AI providers (OpenAI, Google, or Groq):
+
 ```bash
-docker compose down
+# Build containers
+yarn build:cloud
+
+# Start services
+yarn start:cloud
 ```
-
-The Docker setup includes:
-- Bot service with Node.js
-- Redis for persistent storage
-- Ollama with GPU support
-- Shared network for services
-- Volume mounts for data persistence
-
-Note: Make sure you have Docker with GPU support installed if you want to use GPU acceleration for Ollama.
 
 ## Environment Variables
 
-Required:
+### Required
 
-- `TELEGRAM_BOT_TOKEN`: Your Telegram bot token
-- `OLLAMA_API_URL`: URL for Ollama API (default: http://localhost:11434)
-- `MODEL_NAME`: Name of the Ollama model to use (default: llama3.1)
-- `REDIS_URL`: Redis connection URL (default: redis://localhost:6379)
+- `TELEGRAM_BOT_TOKEN`: Telegram Bot token
+- `MODEL_PROVIDER`: AI model provider ('ollama', 'google', 'groq', or 'openai')
+- `REDIS_URL`: Redis connection URL
 
-Optional LangSmith Integration:
+### Provider-Specific
+
+- OpenAI:
+  - `OPENAI_API_KEY`
+  - `OPENAI_MODEL_NAME` (default: gpt-4o-mini)
+- Google:
+  - `GOOGLE_API_KEY`
+  - `GOOGLE_MODEL_NAME` (default: gemini-1.5-flash)
+- Groq:
+  - `GROQ_API_KEY`
+  - `GROQ_MODEL_NAME` (default: llama-3.3-70b-versatile)
+- Ollama:
+  - `OLLAMA_API_URL`
+  - `OLLAMA_MODEL_NAME` (default: llama3.2)
+
+### Optional
 
 - `LANGCHAIN_TRACING_V2`: Enable LangSmith tracing
-- `LANGCHAIN_ENDPOINT`: LangSmith API endpoint
-- `LANGCHAIN_API_KEY`: Your LangSmith API key
-- `LANGCHAIN_PROJECT`: Project name in LangSmith
-
-## Architecture
-
-The bot uses:
-
-- LangGraph for conversation flow management
-- Redis for persistent state and message history
-- Ollama's Llama model for AI responses
-- TypeScript for type safety
-- Optional LangSmith for monitoring and debugging
+- `LANGCHAIN_ENDPOINT`: LangSmith endpoint
+- `LANGCHAIN_API_KEY`: LangSmith API key
+- `LANGCHAIN_PROJECT`: LangSmith project name
 
 ## License
 

@@ -3,12 +3,31 @@ import { CHAT_CONFIG, chatModel, summarizeModel } from '../config';
 import { PROMPTS } from '../prompts';
 import { IChatMessage } from '../types';
 
+const MODEL_PROVIDER = process.env.MODEL_PROVIDER || 'ollama';
+
 export class AIService {
   static async generateResponse(messages: IChatMessage[], lastSummary?: string) {
-    let modelMessages = [new SystemMessage(PROMPTS.CHAT.SYSTEM)];
+    let modelMessages = [];
 
-    if (messages.length > CHAT_CONFIG.maxMessagesBeforeSummary && lastSummary) {
-      modelMessages.push(new SystemMessage(`Previous conversation summary: ${lastSummary}`));
+    if (MODEL_PROVIDER === 'google') {
+      // For Google, merge system messages into one
+      const systemPrompt = [
+        PROMPTS.CHAT.SYSTEM,
+        lastSummary && messages.length > CHAT_CONFIG.maxMessagesBeforeSummary
+          ? `Previous conversation summary: ${lastSummary}`
+          : '',
+      ]
+        .filter(Boolean)
+        .join('\n\n');
+
+      modelMessages = [new SystemMessage(systemPrompt)];
+    } else {
+      // For other providers, keep system messages separate
+      modelMessages = [new SystemMessage(PROMPTS.CHAT.SYSTEM)];
+
+      if (messages.length > CHAT_CONFIG.maxMessagesBeforeSummary && lastSummary) {
+        modelMessages.push(new SystemMessage(`Previous conversation summary: ${lastSummary}`));
+      }
     }
 
     const conversationMessages =
@@ -31,18 +50,24 @@ export class AIService {
   }
 
   static async generateSummary(messages: IChatMessage[], lastSummary?: string) {
-    const modelMessages = [
-      new SystemMessage(PROMPTS.SUMMARY.SYSTEM),
-      ...(lastSummary ? [new SystemMessage(`Previous summary: ${lastSummary}`)] : []),
-    ];
+    let modelMessages = [];
 
-    modelMessages.push(
-      new HumanMessage(
-        messages
-          .map((msg) => `${msg.role}: ${msg.content}`)
-          .join('\n')
-      )
-    );
+    if (MODEL_PROVIDER === 'google') {
+      // For Google, merge system messages into one
+      const systemPrompt = [PROMPTS.SUMMARY.SYSTEM, lastSummary ? `Previous summary: ${lastSummary}` : '']
+        .filter(Boolean)
+        .join('\n\n');
+
+      modelMessages = [new SystemMessage(systemPrompt)];
+    } else {
+      // For other providers, keep system messages separate
+      modelMessages = [
+        new SystemMessage(PROMPTS.SUMMARY.SYSTEM),
+        ...(lastSummary ? [new SystemMessage(`Previous summary: ${lastSummary}`)] : []),
+      ];
+    }
+
+    modelMessages.push(new HumanMessage(messages.map((msg) => `${msg.role}: ${msg.content}`).join('\n')));
 
     const response = await summarizeModel.invoke(modelMessages);
     return response.content.toString();
