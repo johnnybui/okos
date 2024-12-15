@@ -3,6 +3,7 @@ import { ChatGroq } from '@langchain/groq';
 import { ChatOllama } from '@langchain/ollama';
 import { ChatOpenAI } from '@langchain/openai';
 import dotenv from 'dotenv';
+import Groq from 'groq-sdk';
 
 dotenv.config();
 
@@ -17,8 +18,10 @@ export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 type ModelProvider = 'ollama' | 'google' | 'groq' | 'openai';
 export const MODEL_PROVIDER = (process.env.MODEL_PROVIDER || 'ollama') as ModelProvider;
 
-function createChatModel(type: 'chat' | 'summary') {
+function createChatModel(type: 'chat' | 'summary' | 'vision') {
   const isChat = type === 'chat';
+  const isSummary = type === 'summary';
+  const isVision = type === 'vision';
 
   switch (MODEL_PROVIDER) {
     case 'openai':
@@ -26,7 +29,11 @@ function createChatModel(type: 'chat' | 'summary') {
         apiKey: process.env.OPENAI_API_KEY!,
         modelName: isChat
           ? process.env.OPENAI_MODEL_NAME || 'gpt-4o'
-          : process.env.OPENAI_TOOL_MODEL_NAME || 'gpt-4o-mini',
+          : isSummary
+          ? process.env.OPENAI_TOOL_MODEL_NAME || 'gpt-4o-mini'
+          : isVision
+          ? process.env.OPENAI_VISION_MODEL_NAME || 'gpt-4o'
+          : process.env.OPENAI_MODEL_NAME || 'gpt-4o',
         temperature: isChat ? 0.7 : 0,
         maxRetries: 2,
       });
@@ -36,7 +43,11 @@ function createChatModel(type: 'chat' | 'summary') {
         apiKey: process.env.GOOGLE_API_KEY!,
         modelName: isChat
           ? process.env.GOOGLE_MODEL_NAME || 'gemini-1.5-pro'
-          : process.env.GOOGLE_TOOL_MODEL_NAME || 'gemini-1.5-flash',
+          : isSummary
+          ? process.env.GOOGLE_TOOL_MODEL_NAME || 'gemini-1.5-flash'
+          : isVision
+          ? process.env.GOOGLE_VISION_MODEL_NAME || 'gemini-1.5-pro'
+          : process.env.GOOGLE_MODEL_NAME || 'gemini-1.5-pro',
         temperature: isChat ? 0.7 : 0,
         maxRetries: 2,
       });
@@ -46,7 +57,11 @@ function createChatModel(type: 'chat' | 'summary') {
         apiKey: process.env.GROQ_API_KEY!,
         modelName: isChat
           ? process.env.GROQ_MODEL_NAME || 'llama-3.3-70b-versatile'
-          : process.env.GROQ_TOOL_MODEL_NAME || 'llama-3.1-8b-instant',
+          : isSummary
+          ? process.env.GROQ_TOOL_MODEL_NAME || 'llama-3.1-8b-instant'
+          : isVision
+          ? process.env.GROQ_VISION_MODEL_NAME || 'llama-3.2-90b-vision-preview'
+          : process.env.GROQ_MODEL_NAME || 'llama-3.3-70b-versatile',
         temperature: isChat ? 0.7 : 0,
         maxRetries: 2,
       });
@@ -55,7 +70,13 @@ function createChatModel(type: 'chat' | 'summary') {
     default:
       return new ChatOllama({
         baseUrl: OLLAMA_API_URL,
-        model: isChat ? process.env.MODEL_NAME || 'llama3.2' : process.env.TOOL_MODEL_NAME || 'qwen2.5:1b',
+        model: isChat
+          ? process.env.OLLAMA_MODEL_NAME || 'llama3.2'
+          : isSummary
+          ? process.env.OLLAMA_TOOL_MODEL_NAME || 'qwen2.5:1b'
+          : isVision
+          ? process.env.OLLAMA_VISION_MODEL_NAME || 'llama3.2-vision'
+          : process.env.OLLAMA_MODEL_NAME || 'llama3.2',
         temperature: isChat ? 0.7 : 0,
         maxRetries: 2,
       });
@@ -64,6 +85,12 @@ function createChatModel(type: 'chat' | 'summary') {
 
 export const chatModel = createChatModel('chat');
 export const summarizeModel = createChatModel('summary');
+export const visionModel = createChatModel('vision');
+
+export const nativeGroqClient = new Groq({
+  apiKey: process.env.GROQ_API_KEY!,
+  maxRetries: 2,
+});
 
 export const CHAT_CONFIG = {
   maxMessagesBeforeSummary: 6, // Number of messages before triggering summary

@@ -1,20 +1,16 @@
 import express from 'express';
-import { createChatGraph } from './graph';
-import { RedisService } from './services/redis';
+import { handleMessage, handlePhoto } from './handlers';
 import TelegramService from './services/telegram';
 
 const app = express();
 const port = process.env.PORT || 11435;
-
-const redisService = new RedisService();
-const graph = createChatGraph();
 
 // Initialize bot using singleton
 const bot = TelegramService.getInstance();
 
 // Health check endpoint
 app.get('/', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.send('OK');
 });
 
 // Start express server
@@ -30,28 +26,17 @@ bot.on('message', async (msg) => {
     return;
   }
 
-  try {
-    let state = await redisService.getState(chatId);
-    if (!state) {
-      state = {
-        messages: [],
-        currentQuestion: text,
-      };
-    } else {
-      state.currentQuestion = text;
-    }
+  handleMessage(chatId, text);
+});
 
-    await graph.invoke(
-      {
-        state,
-        chatId: chatId,
-      },
-      { recursionLimit: 10, maxConcurrency: 3 }
-    );
-  } catch (error) {
-    console.error('Error processing message:', error);
-    await bot.sendMessage(chatId, 'Sorry, there was an error processing your message.');
-  }
+bot.on('photo', async (msg) => {
+  const chatId = msg.chat.id;
+  const photos = msg.photo;
+  const caption = msg.caption;
+
+  if (!photos) return;
+
+  handlePhoto(chatId, photos, caption);
 });
 
 // Handle errors
