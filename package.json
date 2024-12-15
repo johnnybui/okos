@@ -1,7 +1,11 @@
 {
-  "name": "telegram-ai-assistant",
+  "name": "okos-telegram",
   "version": "1.0.0",
-  "description": "AI Assistant Telegram Bot using LangGraph and Ollama",
+  "description": "Okos - AI Assistant Telegram Bot using LangGraph and Ollama or Cloud LLM Providers",
+  "author": {
+    "name": "Johnny Bui",
+    "url": "https://github.com/johnnybui"
+  },
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",

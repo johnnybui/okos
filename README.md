@@ -1,5 +1,7 @@
 # Okos - AI Telegram Assistant
 
+[![Build](https://github.com/johnnybui/okos/actions/workflows/build.yml/badge.svg)](https://github.com/johnnybui/okos/actions/workflows/build.yml)
+
 Okos is a Telegram AI Assistant built with TypeScript, LangGraph, and multiple AI model providers. It maintains conversation context and provides summaries of interactions.
 
 ## Features
@@ -12,7 +14,7 @@ Okos is a Telegram AI Assistant built with TypeScript, LangGraph, and multiple A
 
 ## Prerequisites
 
-- Node.js 18+ (for development only)
+- Node.js 20+ (for development only)
 - Docker and Docker Compose (for containerized deployment)
 - Telegram Bot Token from [BotFather](https://t.me/botfather)
 - API keys for chosen AI providers
