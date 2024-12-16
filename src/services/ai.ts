@@ -1,6 +1,14 @@
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import axios from 'axios';
-import { CHAT_CONFIG, chatModel, MODEL_PROVIDER, nativeGroqClient, summarizeModel, visionModel } from '../config';
+import {
+  CHAT_CONFIG,
+  chatModel,
+  MODEL_PROVIDER,
+  MODEL_VISION_PROVIDER,
+  nativeGroqClient,
+  summarizeModel,
+  visionModel,
+} from '../config';
 import { PROMPTS } from '../prompts';
 import { IChatMessage } from '../types';
 
@@ -73,7 +81,7 @@ export class AIService {
   }
 
   static async analyzeImage(imageUrl: string, question?: string) {
-    if (MODEL_PROVIDER === 'openai' || MODEL_PROVIDER === 'ollama') {
+    if (MODEL_VISION_PROVIDER === 'openai' || MODEL_VISION_PROVIDER === 'ollama') {
       const systemMessage = new SystemMessage(PROMPTS.VISION.SYSTEM);
       const humanMessage = new HumanMessage({
         content: [
@@ -96,7 +104,7 @@ export class AIService {
 
     // LangChain ChatGroq does not support image input
     // Native Groq SDK only support preview models for vision at the moment
-    if (MODEL_PROVIDER === 'groq') {
+    if (MODEL_VISION_PROVIDER === 'groq') {
       const response = await nativeGroqClient.chat.completions.create({
         messages: [
           {
@@ -122,7 +130,7 @@ export class AIService {
       return imageContext || 'User uploaded a photo but we could not analyze it.';
     }
 
-    if (MODEL_PROVIDER === 'google') {
+    if (MODEL_VISION_PROVIDER === 'google') {
       // For google, fetch the image and convert it to Base64
       const imageRes = await axios.get(imageUrl, { responseType: 'arraybuffer' });
       const imageData = Buffer.from(imageRes.data).toString('base64');

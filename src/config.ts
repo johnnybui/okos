@@ -17,69 +17,115 @@ export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
 type ModelProvider = 'ollama' | 'google' | 'groq' | 'openai';
 export const MODEL_PROVIDER = (process.env.MODEL_PROVIDER || 'ollama') as ModelProvider;
+export const MODEL_VISION_PROVIDER = (process.env.MODEL_VISION_PROVIDER || MODEL_PROVIDER) as ModelProvider;
 
 function createChatModel(type: 'chat' | 'summary' | 'vision') {
-  const isChat = type === 'chat';
-  const isSummary = type === 'summary';
-  const isVision = type === 'vision';
+  const temperature = type === 'chat' ? 0.7 : 0;
 
-  switch (MODEL_PROVIDER) {
-    case 'openai':
-      return new ChatOpenAI({
-        apiKey: process.env.OPENAI_API_KEY!,
-        modelName: isChat
-          ? process.env.OPENAI_MODEL_NAME || 'gpt-4o'
-          : isSummary
-          ? process.env.OPENAI_TOOL_MODEL_NAME || 'gpt-4o-mini'
-          : isVision
-          ? process.env.OPENAI_VISION_MODEL_NAME || 'gpt-4o'
-          : process.env.OPENAI_MODEL_NAME || 'gpt-4o',
-        temperature: isChat ? 0.7 : 0,
-        maxRetries: 2,
-      });
+  switch (type) {
+    case 'vision': {
+      const provider = MODEL_VISION_PROVIDER || MODEL_PROVIDER;
+      switch (provider) {
+        case 'openai':
+          return new ChatOpenAI({
+            apiKey: process.env.OPENAI_API_KEY!,
+            modelName: process.env.OPENAI_VISION_MODEL_NAME || 'gpt-4o',
+            temperature,
+            maxRetries: 2,
+          });
+        case 'google':
+          return new ChatGoogleGenerativeAI({
+            apiKey: process.env.GOOGLE_API_KEY!,
+            modelName: process.env.GOOGLE_VISION_MODEL_NAME || 'gemini-1.5-pro',
+            temperature,
+            maxRetries: 2,
+          });
+        case 'groq':
+          return new ChatGroq({
+            apiKey: process.env.GROQ_API_KEY!,
+            modelName: process.env.GROQ_VISION_MODEL_NAME || 'llama-3.2-90b-vision-preview',
+            temperature,
+            maxRetries: 2,
+          });
+        case 'ollama':
+        default:
+          return new ChatOllama({
+            baseUrl: OLLAMA_API_URL,
+            model: process.env.OLLAMA_VISION_MODEL_NAME || 'llama3.2-vision',
+            temperature,
+            maxRetries: 2,
+          });
+      }
+    }
 
-    case 'google':
-      return new ChatGoogleGenerativeAI({
-        apiKey: process.env.GOOGLE_API_KEY!,
-        modelName: isChat
-          ? process.env.GOOGLE_MODEL_NAME || 'gemini-1.5-pro'
-          : isSummary
-          ? process.env.GOOGLE_TOOL_MODEL_NAME || 'gemini-1.5-flash'
-          : isVision
-          ? process.env.GOOGLE_VISION_MODEL_NAME || 'gemini-1.5-pro'
-          : process.env.GOOGLE_MODEL_NAME || 'gemini-1.5-pro',
-        temperature: isChat ? 0.7 : 0,
-        maxRetries: 2,
-      });
+    case 'summary': {
+      switch (MODEL_PROVIDER) {
+        case 'openai':
+          return new ChatOpenAI({
+            apiKey: process.env.OPENAI_API_KEY!,
+            modelName: process.env.OPENAI_TOOL_MODEL_NAME || 'gpt-4o-mini',
+            temperature,
+            maxRetries: 2,
+          });
+        case 'google':
+          return new ChatGoogleGenerativeAI({
+            apiKey: process.env.GOOGLE_API_KEY!,
+            modelName: process.env.GOOGLE_TOOL_MODEL_NAME || 'gemini-1.5-flash',
+            temperature,
+            maxRetries: 2,
+          });
+        case 'groq':
+          return new ChatGroq({
+            apiKey: process.env.GROQ_API_KEY!,
+            modelName: process.env.GROQ_TOOL_MODEL_NAME || 'llama-3.1-8b-instant',
+            temperature,
+            maxRetries: 2,
+          });
+        case 'ollama':
+        default:
+          return new ChatOllama({
+            baseUrl: OLLAMA_API_URL,
+            model: process.env.OLLAMA_TOOL_MODEL_NAME || 'qwen2.5:1b',
+            temperature,
+            maxRetries: 2,
+          });
+      }
+    }
 
-    case 'groq':
-      return new ChatGroq({
-        apiKey: process.env.GROQ_API_KEY!,
-        modelName: isChat
-          ? process.env.GROQ_MODEL_NAME || 'llama-3.3-70b-versatile'
-          : isSummary
-          ? process.env.GROQ_TOOL_MODEL_NAME || 'llama-3.1-8b-instant'
-          : isVision
-          ? process.env.GROQ_VISION_MODEL_NAME || 'llama-3.2-90b-vision-preview'
-          : process.env.GROQ_MODEL_NAME || 'llama-3.3-70b-versatile',
-        temperature: isChat ? 0.7 : 0,
-        maxRetries: 2,
-      });
-
-    case 'ollama':
-    default:
-      return new ChatOllama({
-        baseUrl: OLLAMA_API_URL,
-        model: isChat
-          ? process.env.OLLAMA_MODEL_NAME || 'llama3.2'
-          : isSummary
-          ? process.env.OLLAMA_TOOL_MODEL_NAME || 'qwen2.5:1b'
-          : isVision
-          ? process.env.OLLAMA_VISION_MODEL_NAME || 'llama3.2-vision'
-          : process.env.OLLAMA_MODEL_NAME || 'llama3.2',
-        temperature: isChat ? 0.7 : 0,
-        maxRetries: 2,
-      });
+    case 'chat':
+    default: {
+      switch (MODEL_PROVIDER) {
+        case 'openai':
+          return new ChatOpenAI({
+            apiKey: process.env.OPENAI_API_KEY!,
+            modelName: process.env.OPENAI_MODEL_NAME || 'gpt-4o',
+            temperature,
+            maxRetries: 2,
+          });
+        case 'google':
+          return new ChatGoogleGenerativeAI({
+            apiKey: process.env.GOOGLE_API_KEY!,
+            modelName: process.env.GOOGLE_MODEL_NAME || 'gemini-1.5-pro',
+            temperature,
+            maxRetries: 2,
+          });
+        case 'groq':
+          return new ChatGroq({
+            apiKey: process.env.GROQ_API_KEY!,
+            modelName: process.env.GROQ_MODEL_NAME || 'llama-3.3-70b-versatile',
+            temperature,
+            maxRetries: 2,
+          });
+        case 'ollama':
+        default:
+          return new ChatOllama({
+            baseUrl: OLLAMA_API_URL,
+            model: process.env.OLLAMA_MODEL_NAME || 'llama3.2',
+            temperature,
+            maxRetries: 2,
+          });
+      }
+    }
   }
 }
 
