@@ -1,4 +1,5 @@
 import TelegramBot from 'node-telegram-bot-api';
+import { STICKER } from './config';
 import { createChatGraph } from './graph';
 import { AIService } from './services/ai';
 import { RedisService } from './services/redis';
@@ -16,7 +17,7 @@ export async function handleMessage(chatId: number, text: string) {
     const isLimited = await redisService.isRateLimited(chatId, 'message', MESSAGE_COOLDOWN_SECONDS);
 
     if (isLimited) {
-      await TelegramService.sendMessage(chatId, `Calm down! Let me think about your last message. 😭`);
+      await TelegramService.sendSticker(chatId, STICKER.WRITING);
       return;
     }
 
@@ -48,10 +49,7 @@ export async function handlePhoto(chatId: number, photos: TelegramBot.PhotoSize[
     const isLimited = await redisService.isRateLimited(chatId, 'photo', PHOTO_COOLDOWN_SECONDS);
 
     if (isLimited) {
-      await TelegramService.sendMessage(
-        chatId,
-        `Still 👀 last photo. Please send only 1 photo at a time and wait for me to read it. 😭`
-      );
+      await TelegramService.sendSticker(chatId, STICKER.CALM_DOWN);
       return;
     }
 
@@ -59,14 +57,16 @@ export async function handlePhoto(chatId: number, photos: TelegramBot.PhotoSize[
     const photo = photos[2] || photos[1] || photos[0];
     const fileLink = await TelegramService.getInstance().getFileLink(photo.file_id);
 
-    await TelegramService.sendChatAction(chatId, 'upload_photo');
+    await TelegramService.sendChatAction(chatId, 'typing');
+    const pleaseWaitStickerMsg = await TelegramService.sendSticker(chatId, STICKER.WAIT);
 
     const analysis = await AIService.analyzeImage(fileLink, caption);
     const messageText = caption
       ? `[User sent you a Photo with caption: "${caption}"]\n\nPhoto is analyzed by another AI agent and is about: ${analysis}`
       : `[User sent you a Photo]\n\nPhoto is analyzed by another AI agent and is about: ${analysis}`;
 
-    handleMessage(chatId, messageText);
+    await handleMessage(chatId, messageText);
+    TelegramService.deleteMessage(chatId, pleaseWaitStickerMsg.message_id);
   } catch (error) {
     console.error('Error processing photo:', error);
     await TelegramService.sendMessage(chatId, 'Sorry, I had trouble analyzing that image. Please try again.');

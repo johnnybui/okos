@@ -12,14 +12,24 @@ class TelegramService {
     return TelegramService.instance;
   }
 
-  static async sendMessage(chatId: number, message: string): Promise<void> {
+  static async sendMessage(chatId: number, message: string): Promise<TelegramBot.Message> {
     const bot = TelegramService.getInstance();
-    await bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+    return await bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
   }
 
-  static async sendChatAction(chatId: number, action: TelegramBot.ChatAction): Promise<void> {
+  static async sendChatAction(chatId: number, action: TelegramBot.ChatAction): Promise<boolean> {
     const bot = TelegramService.getInstance();
-    await bot.sendChatAction(chatId, action);
+    return await bot.sendChatAction(chatId, action);
+  }
+
+  static async sendSticker(chatId: number, stickerId: string): Promise<TelegramBot.Message> {
+    const bot = TelegramService.getInstance();
+    return await bot.sendSticker(chatId, stickerId);
+  }
+
+  static async deleteMessage(chatId: number, messageId: number): Promise<boolean> {
+    const bot = TelegramService.getInstance();
+    return await bot.deleteMessage(chatId, messageId);
   }
 }
 

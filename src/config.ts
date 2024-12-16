@@ -97,3 +97,9 @@ export const CHAT_CONFIG = {
   messagesToKeep: 6, // Number of recent messages to keep in context
   messagesWithSummary: 2, // Number of recent messages to keep when summary is included
 } as const;
+
+export const STICKER = {
+  CALM_DOWN: 'CAACAgEAAxkBAAOMZ1-PTzHWqvt_DRwwUxlL-oBtLE4AAs8BAAI4DoIRnu4VKzeS-Og2BA',
+  WRITING: 'CAACAgIAAxkBAAOSZ1-RSUrBUu3yQVTPY2eSVpxjQfEAAscKAAL8ZQFK3xJDDRnCQEE2BA',
+  WAIT: 'CAACAgIAAxkBAAOUZ1-RvLfRDcMh9_KjpGr8q_uyU30AAiwAAyRxYhrFIOYD73j85DYE',
+};

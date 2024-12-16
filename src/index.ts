@@ -39,6 +39,20 @@ bot.on('photo', async (msg) => {
   handlePhoto(chatId, photos, caption);
 });
 
+bot.on('sticker', async (msg) => {
+  const chatId = msg.chat.id;
+  const sticker = msg.sticker;
+  const emoji = sticker?.emoji;
+
+  if (emoji) {
+    return handleMessage(chatId, emoji);
+  }
+
+  if (sticker?.file_id) {
+    return bot.sendSticker(chatId, sticker.file_id);
+  }
+});
+
 // Handle errors
 bot.on('polling_error', (error) => {
   console.error('Polling error:', error);
