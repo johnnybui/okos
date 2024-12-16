@@ -8,6 +8,7 @@ export class RedisService {
   private readonly summaryPrefix = 'summary:';
   private readonly messagesPrefix = 'messages:';
   private readonly memoryPrefix = 'memory:';
+  private readonly rateLimitPrefix = 'ratelimit:';
 
   constructor() {
     this.client = new Redis(process.env.REDIS_URL || REDIS_URL);
@@ -27,6 +28,10 @@ export class RedisService {
 
   private getMemoryKey(chatId: number): string {
     return `${this.memoryPrefix}${chatId}`;
+  }
+
+  private getRateLimitKey(chatId: number, type: string): string {
+    return `${this.rateLimitPrefix}${type}:${chatId}`;
   }
 
   async saveState(chatId: number, state: IChatState): Promise<void> {
@@ -97,7 +102,7 @@ export class RedisService {
 
   async getMemory(chatId: number): Promise<string | undefined> {
     const key = this.getMemoryKey(chatId);
-    return await this.client.get(key) || undefined;
+    return (await this.client.get(key)) || undefined;
   }
 
   async deleteState(chatId: number): Promise<void> {
@@ -106,6 +111,23 @@ export class RedisService {
     const messagesKey = this.getMessagesKey(chatId);
     const memoryKey = this.getMemoryKey(chatId);
 
-    await Promise.all([this.client.del(key), this.client.del(summaryKey), this.client.del(messagesKey), this.client.del(memoryKey)]);
+    await Promise.all([
+      this.client.del(key),
+      this.client.del(summaryKey),
+      this.client.del(messagesKey),
+      this.client.del(memoryKey),
+    ]);
+  }
+
+  async isRateLimited(chatId: number, type: string, cooldownSeconds: number): Promise<boolean> {
+    try {
+      const key = this.getRateLimitKey(chatId, type);
+      // Use SET NX to atomically check and set the rate limit
+      const result = await this.client.set(key, '1', 'EX', cooldownSeconds, 'NX');
+      return result === null; // true if rate limited (key exists), false if not rate limited (key was set)
+    } catch (error) {
+      console.error('Error checking rate limit:', error);
+      return false;
+    }
   }
 }
