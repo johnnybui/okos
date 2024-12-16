@@ -144,6 +144,9 @@ export const CHAT_CONFIG = {
   maxMessagesBeforeSummary: 6, // Number of messages before triggering summary
   messagesToKeep: 6, // Number of recent messages to keep in context
   messagesWithSummary: 2, // Number of recent messages to keep when summary is included
+  messageCooldownSeconds: 3,
+  photoCooldownSeconds: 10,
+  maxPhotosInMessage: 5,
 } as const;
 
 export const STICKER = {
