@@ -1,4 +1,5 @@
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import axios from 'axios';
 import { CHAT_CONFIG, chatModel, MODEL_PROVIDER, nativeGroqClient, summarizeModel, visionModel } from '../config';
 import { PROMPTS } from '../prompts';
 import { IChatMessage } from '../types';
@@ -119,6 +120,33 @@ export class AIService {
       const imageContext = response.choices?.[0]?.message?.content;
 
       return imageContext || 'User uploaded a photo but we could not analyze it.';
+    }
+
+    if (MODEL_PROVIDER === 'google') {
+      // For google, fetch the image and convert it to Base64
+      const imageRes = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+      const imageData = Buffer.from(imageRes.data).toString('base64');
+
+      const systemMessage = new SystemMessage(PROMPTS.VISION.SYSTEM);
+      const humanMessage = new HumanMessage({
+        content: [
+          {
+            type: 'text',
+            text: PROMPTS.VISION.formatUserPrompt(question),
+          },
+          {
+            type: 'image_url',
+            image_url: {
+              url: `data:image/jpeg;base64,${imageData}`,
+            },
+          },
+        ],
+      });
+
+      const messages = [systemMessage, humanMessage];
+
+      const response = await visionModel.invoke(messages);
+      return response.content.toString();
     }
 
     return 'Image analysis is not supported for the current model provider.';
