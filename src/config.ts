@@ -18,6 +18,7 @@ export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 type ModelProvider = 'ollama' | 'google' | 'groq' | 'openai';
 export const MODEL_PROVIDER = (process.env.MODEL_PROVIDER || 'ollama') as ModelProvider;
 export const MODEL_VISION_PROVIDER = (process.env.MODEL_VISION_PROVIDER || MODEL_PROVIDER) as ModelProvider;
+export const MODEL_TOOL_PROVIDER = (process.env.MODEL_TOOL_PROVIDER || MODEL_PROVIDER) as ModelProvider;
 
 function createChatModel(type: 'chat' | 'summary' | 'vision') {
   const temperature = type === 'chat' ? 0.7 : 0;
@@ -59,7 +60,8 @@ function createChatModel(type: 'chat' | 'summary' | 'vision') {
     }
 
     case 'summary': {
-      switch (MODEL_PROVIDER) {
+      const provider = MODEL_TOOL_PROVIDER || MODEL_PROVIDER;
+      switch (provider) {
         case 'openai':
           return new ChatOpenAI({
             apiKey: process.env.OPENAI_API_KEY!,

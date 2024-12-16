@@ -4,6 +4,7 @@ import {
   CHAT_CONFIG,
   chatModel,
   MODEL_PROVIDER,
+  MODEL_TOOL_PROVIDER,
   MODEL_VISION_PROVIDER,
   nativeGroqClient,
   summarizeModel,
@@ -13,8 +14,10 @@ import { PROMPTS } from '../prompts';
 import { IChatMessage } from '../types';
 
 export class AIService {
-  private static mergeSystemMessages(messages: string[]): SystemMessage[] {
-    if (MODEL_PROVIDER === 'google') {
+  private static mergeSystemMessages(messages: string[], provider?: string): SystemMessage[] {
+    provider = provider || MODEL_PROVIDER;
+
+    if (provider === 'google') {
       // For Google, merge system messages into one
       return [new SystemMessage(messages.filter(Boolean).join('\n\n'))];
     }
@@ -51,10 +54,10 @@ export class AIService {
   }
 
   static async generateSummary(messages: IChatMessage[], lastSummary?: string) {
-    const systemMessages = this.mergeSystemMessages([
-      PROMPTS.SUMMARY.SYSTEM,
-      lastSummary ? `Previous summary: ${lastSummary}` : '',
-    ]);
+    const systemMessages = this.mergeSystemMessages(
+      [PROMPTS.SUMMARY.SYSTEM, lastSummary ? `Previous summary: ${lastSummary}` : ''],
+      MODEL_TOOL_PROVIDER || MODEL_PROVIDER
+    );
 
     const modelMessages = [
       ...systemMessages,
@@ -66,10 +69,10 @@ export class AIService {
   }
 
   static async generateMemory(messages: IChatMessage[], existingMemory?: string) {
-    const systemMessages = this.mergeSystemMessages([
-      PROMPTS.MEMORY.SYSTEM,
-      existingMemory ? `Existing memory: ${existingMemory}` : '',
-    ]);
+    const systemMessages = this.mergeSystemMessages(
+      [PROMPTS.MEMORY.SYSTEM, existingMemory ? `Existing memory: ${existingMemory}` : ''],
+      MODEL_TOOL_PROVIDER || MODEL_PROVIDER
+    );
 
     const modelMessages = [
       ...systemMessages,
@@ -81,7 +84,9 @@ export class AIService {
   }
 
   static async analyzeImage(imageUrl: string, question?: string) {
-    if (MODEL_VISION_PROVIDER === 'openai' || MODEL_VISION_PROVIDER === 'ollama') {
+    const provider = MODEL_VISION_PROVIDER || MODEL_PROVIDER;
+
+    if (provider === 'openai' || provider === 'ollama') {
       const systemMessage = new SystemMessage(PROMPTS.VISION.SYSTEM);
       const humanMessage = new HumanMessage({
         content: [
@@ -104,7 +109,7 @@ export class AIService {
 
     // LangChain ChatGroq does not support image input
     // Native Groq SDK only support preview models for vision at the moment
-    if (MODEL_VISION_PROVIDER === 'groq') {
+    if (provider === 'groq') {
       const response = await nativeGroqClient.chat.completions.create({
         messages: [
           {
@@ -130,7 +135,7 @@ export class AIService {
       return imageContext || 'User uploaded a photo but we could not analyze it.';
     }
 
-    if (MODEL_VISION_PROVIDER === 'google') {
+    if (provider === 'google') {
       // For google, fetch the image and convert it to Base64
       const imageRes = await axios.get(imageUrl, { responseType: 'arraybuffer' });
       const imageData = Buffer.from(imageRes.data).toString('base64');
