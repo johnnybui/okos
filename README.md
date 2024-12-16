@@ -9,7 +9,8 @@ Okos is a Telegram AI Assistant built with TypeScript, LangGraph, and multiple A
 - Multiple AI model support (OpenAI, Google Gemini, Groq, Ollama)
 - Conversation context management
 - Automatic conversation summarization
-- Image input support
+- Multiple Images input support
+- Internet searching
 - Redis for state persistence
 - Docker support for both local and cloud deployments
 
@@ -98,6 +99,7 @@ yarn up:cloud
 
 - `TELEGRAM_BOT_TOKEN`: Telegram Bot token
 - `MODEL_PROVIDER`: AI model provider ('ollama', 'google', 'groq', or 'openai')
+- `TAVILY_API_KEY`: Tavily API key for internet searching
 - `REDIS_URL`: Redis connection URL
 
 ### Provider-Specific

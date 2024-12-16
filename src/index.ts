@@ -72,6 +72,8 @@ bot.on('sticker', async (msg) => {
   const sticker = msg.sticker;
   const emoji = sticker?.emoji;
 
+  console.log(111111, sticker?.file_id);
+
   if (emoji) {
     return handleMessage(chatId, emoji);
   }

@@ -4,6 +4,7 @@ import { ChatOllama } from '@langchain/ollama';
 import { ChatOpenAI } from '@langchain/openai';
 import dotenv from 'dotenv';
 import Groq from 'groq-sdk';
+import { searchTool } from './tools';
 
 dotenv.config();
 
@@ -96,37 +97,45 @@ function createChatModel(type: 'chat' | 'summary' | 'vision') {
 
     case 'chat':
     default: {
+      let chatModel: ChatOpenAI | ChatGoogleGenerativeAI | ChatGroq | ChatOllama;
+
       switch (MODEL_PROVIDER) {
         case 'openai':
-          return new ChatOpenAI({
+          chatModel = new ChatOpenAI({
             apiKey: process.env.OPENAI_API_KEY!,
             modelName: process.env.OPENAI_MODEL_NAME || 'gpt-4o',
             temperature,
             maxRetries: 2,
           });
+          break;
         case 'google':
-          return new ChatGoogleGenerativeAI({
+          chatModel = new ChatGoogleGenerativeAI({
             apiKey: process.env.GOOGLE_API_KEY!,
             modelName: process.env.GOOGLE_MODEL_NAME || 'gemini-1.5-pro',
             temperature,
             maxRetries: 2,
           });
+          break;
         case 'groq':
-          return new ChatGroq({
+          chatModel = new ChatGroq({
             apiKey: process.env.GROQ_API_KEY!,
             modelName: process.env.GROQ_MODEL_NAME || 'llama-3.3-70b-versatile',
             temperature,
             maxRetries: 2,
           });
+          break;
         case 'ollama':
         default:
-          return new ChatOllama({
+          chatModel = new ChatOllama({
             baseUrl: OLLAMA_API_URL,
             model: process.env.OLLAMA_MODEL_NAME || 'llama3.2',
             temperature,
             maxRetries: 2,
           });
+          break;
       }
+
+      return chatModel.bindTools([searchTool]);
     }
   }
 }
@@ -153,4 +162,5 @@ export const STICKER = {
   CALM_DOWN: 'CAACAgEAAxkBAAOMZ1-PTzHWqvt_DRwwUxlL-oBtLE4AAs8BAAI4DoIRnu4VKzeS-Og2BA',
   WRITING: 'CAACAgIAAxkBAAOSZ1-RSUrBUu3yQVTPY2eSVpxjQfEAAscKAAL8ZQFK3xJDDRnCQEE2BA',
   WAIT: 'CAACAgIAAxkBAAOUZ1-RvLfRDcMh9_KjpGr8q_uyU30AAiwAAyRxYhrFIOYD73j85DYE',
+  SEARCHING: 'CAACAgIAAxkBAAIBU2dgEbkFtLnf4or-dlN5C5pCjWDtAAJWAAMNttIZ3DOhnyotnbI2BA',
 };

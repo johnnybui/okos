@@ -48,7 +48,7 @@ const generateResponse = async (context: typeof ChatContext.State): Promise<ICha
   const { state, chatId } = context;
 
   await TelegramService.sendChatAction(chatId, 'typing');
-  const responseContent = await AIService.generateResponse(state.messages, state.lastSummary, state.memory);
+  const responseContent = await AIService.generateResponse(chatId, state.messages, state.lastSummary, state.memory);
   state.messages.push({ role: 'assistant', content: responseContent });
 
   await Promise.all([TelegramService.sendMessage(chatId, responseContent), redisService.saveState(chatId, state)]);

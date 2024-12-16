@@ -1,32 +1,37 @@
-import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { RunnableLambda } from '@langchain/core/runnables';
 import axios from 'axios';
+import TelegramBot from 'node-telegram-bot-api';
 import {
   CHAT_CONFIG,
   chatModel,
   MODEL_PROVIDER,
-  MODEL_TOOL_PROVIDER,
   MODEL_VISION_PROVIDER,
   nativeGroqClient,
+  STICKER,
   summarizeModel,
   visionModel,
 } from '../config';
 import { PROMPTS } from '../prompts';
+import { searchTool } from '../tools';
 import { IChatMessage } from '../types';
+import TelegramService from './telegram';
 
 export class AIService {
-  private static mergeSystemMessages(messages: string[], provider?: string): SystemMessage[] {
-    provider = provider || MODEL_PROVIDER;
-
-    if (provider === 'google') {
-      // For Google, merge system messages into one
-      return [new SystemMessage(messages.filter(Boolean).join('\n\n'))];
-    }
-    // For other providers, keep system messages separate
-    return messages.filter(Boolean).map((msg) => new SystemMessage(msg));
+  private static mergeSystemMessages(messages: string[]): SystemMessage {
+    return new SystemMessage(messages.filter(Boolean).join('\n\n'));
   }
 
-  static async generateResponse(messages: IChatMessage[], lastSummary?: string, memory?: string) {
-    const systemMessages = this.mergeSystemMessages([
+  static async generateResponse(chatId: number, messages: IChatMessage[], lastSummary?: string, memory?: string) {
+    const prompt = ChatPromptTemplate.fromMessages([
+      ['system', '{systemPrompt}'],
+      ['placeholder', '{messages}'],
+    ]);
+
+    const chain = prompt.pipe(chatModel);
+
+    const systemMessage = this.mergeSystemMessages([
       PROMPTS.CHAT.SYSTEM,
       lastSummary && messages.length > CHAT_CONFIG.maxMessagesBeforeSummary
         ? `Previous conversation summary: ${lastSummary}`
@@ -39,28 +44,37 @@ export class AIService {
         ? messages.slice(-CHAT_CONFIG.messagesWithSummary)
         : messages.slice(-CHAT_CONFIG.messagesToKeep);
 
-    const modelMessages = systemMessages.concat(
-      conversationMessages.map((msg) =>
-        msg.role === 'user'
-          ? new HumanMessage(msg.content)
-          : msg.role === 'assistant'
-          ? new AIMessage(msg.content)
-          : new SystemMessage(msg.content)
-      )
-    );
+    let searchingStickerMsg: TelegramBot.Message | undefined;
 
-    const response = await chatModel.invoke(modelMessages);
+    const toolChain = RunnableLambda.from(async (messages: IChatMessage[]) => {
+      const aiMsg = await chain.invoke({ systemPrompt: systemMessage, messages });
+
+      if (aiMsg.tool_calls?.length) {
+        searchingStickerMsg = await TelegramService.sendSticker(chatId, STICKER.SEARCHING);
+        const toolMsgs = await searchTool.batch(aiMsg.tool_calls);
+
+        return chain.invoke({ systemPrompt: systemMessage, messages: [...messages, aiMsg, ...toolMsgs] });
+      }
+
+      return aiMsg;
+    });
+
+    const response = await toolChain.invoke(conversationMessages);
+    if (searchingStickerMsg?.message_id) {
+      TelegramService.deleteMessage(chatId, searchingStickerMsg.message_id);
+    }
+
     return response.content.toString();
   }
 
   static async generateSummary(messages: IChatMessage[], lastSummary?: string) {
-    const systemMessages = this.mergeSystemMessages(
-      [PROMPTS.SUMMARY.SYSTEM, lastSummary ? `Previous summary: ${lastSummary}` : ''],
-      MODEL_TOOL_PROVIDER || MODEL_PROVIDER
-    );
+    const systemMessage = this.mergeSystemMessages([
+      PROMPTS.SUMMARY.SYSTEM,
+      lastSummary ? `Previous summary: ${lastSummary}` : '',
+    ]);
 
     const modelMessages = [
-      ...systemMessages,
+      systemMessage,
       new HumanMessage(messages.map((msg) => `${msg.role}: ${msg.content}`).join('\n')),
     ];
 
@@ -69,13 +83,13 @@ export class AIService {
   }
 
   static async generateMemory(messages: IChatMessage[], existingMemory?: string) {
-    const systemMessages = this.mergeSystemMessages(
-      [PROMPTS.MEMORY.SYSTEM, existingMemory ? `Existing memory: ${existingMemory}` : ''],
-      MODEL_TOOL_PROVIDER || MODEL_PROVIDER
-    );
+    const systemMessage = this.mergeSystemMessages([
+      PROMPTS.MEMORY.SYSTEM,
+      existingMemory ? `Existing memory: ${existingMemory}` : '',
+    ]);
 
     const modelMessages = [
-      ...systemMessages,
+      systemMessage,
       new HumanMessage(messages.map((msg) => `${msg.role}: ${msg.content}`).join('\n')),
     ];
 
@@ -131,7 +145,7 @@ Tell user that we are only analyzing the first image`,
             ],
           },
         ],
-        model: visionModel.model,
+        model: process.env.GROQ_VISION_MODEL_NAME || 'llama-3.2-90b-vision-preview',
         temperature: 0,
       });
 
