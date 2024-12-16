@@ -53,17 +53,17 @@ export async function handlePhoto(chatId: number, photos: TelegramBot.PhotoSize[
       return;
     }
 
-    // Get the photo with from medium resolution (index 2)
-    const photo = photos[2] || photos[1] || photos[0];
-    const fileLink = await TelegramService.getInstance().getFileLink(photo.file_id);
+    const fileLinks = await Promise.all(
+      photos.map((photo) => TelegramService.getInstance().getFileLink(photo.file_id))
+    );
 
     await TelegramService.sendChatAction(chatId, 'typing');
     const pleaseWaitStickerMsg = await TelegramService.sendSticker(chatId, STICKER.WAIT);
 
-    const analysis = await AIService.analyzeImage(fileLink, caption);
+    const analysis = await AIService.analyzeImage(fileLinks, caption);
     const messageText = caption
-      ? `[User sent you a Photo with caption: "${caption}"]\n\nPhoto is analyzed by another AI agent and is about: ${analysis}`
-      : `[User sent you a Photo]\n\nPhoto is analyzed by another AI agent and is about: ${analysis}`;
+      ? `[User sent you one or more Photos with caption: "${caption}"]\n\nPhotos are analyzed by another AI agent and are about: ${analysis}`
+      : `[User sent you one or more Photos]\n\nPhotos are analyzed by another AI agent and are about: ${analysis}`;
 
     await handleMessage(chatId, messageText);
     TelegramService.deleteMessage(chatId, pleaseWaitStickerMsg.message_id);

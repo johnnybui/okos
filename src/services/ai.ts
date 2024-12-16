@@ -83,7 +83,11 @@ export class AIService {
     return response.content.toString();
   }
 
-  static async analyzeImage(imageUrl: string, question?: string) {
+  static async analyzeImage(imageUrls: string[], question?: string) {
+    if (imageUrls.length === 0) {
+      return 'Images are not recognized.';
+    }
+
     const provider = MODEL_VISION_PROVIDER || MODEL_PROVIDER;
 
     if (provider === 'openai' || provider === 'ollama') {
@@ -94,10 +98,10 @@ export class AIService {
             type: 'text',
             text: PROMPTS.VISION.formatUserPrompt(question),
           },
-          {
+          ...imageUrls.map((url) => ({
             type: 'image_url',
-            image_url: { url: imageUrl },
-          },
+            image_url: { url },
+          })),
         ],
       });
 
@@ -108,7 +112,7 @@ export class AIService {
     }
 
     // LangChain ChatGroq does not support image input
-    // Native Groq SDK only support preview models for vision at the moment
+    // Native Groq SDK only support preview models for vision, only supports one image at the moment
     if (provider === 'groq') {
       const response = await nativeGroqClient.chat.completions.create({
         messages: [
@@ -117,11 +121,12 @@ export class AIService {
             content: [
               {
                 type: 'text',
-                text: `${PROMPTS.VISION.SYSTEM}\n\n${PROMPTS.VISION.formatUserPrompt(question)}`,
+                text: `${PROMPTS.VISION.SYSTEM}\n\n${PROMPTS.VISION.formatUserPrompt(question)}
+Tell user that we are only analyzing the first image`,
               },
               {
                 type: 'image_url',
-                image_url: { url: imageUrl },
+                image_url: { url: imageUrls[0] }, // Groq sdk only supports one image
               },
             ],
           },
@@ -137,8 +142,10 @@ export class AIService {
 
     if (provider === 'google') {
       // For google, fetch the image and convert it to Base64
-      const imageRes = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-      const imageData = Buffer.from(imageRes.data).toString('base64');
+      const imagesBuffers = await Promise.all(
+        imageUrls.map((imageUrl) => axios.get(imageUrl, { responseType: 'arraybuffer' }))
+      );
+      const imagesData = imagesBuffers.map((buffer) => Buffer.from(buffer.data).toString('base64'));
 
       const systemMessage = new SystemMessage(PROMPTS.VISION.SYSTEM);
       const humanMessage = new HumanMessage({
@@ -147,12 +154,12 @@ export class AIService {
             type: 'text',
             text: PROMPTS.VISION.formatUserPrompt(question),
           },
-          {
+          ...imagesData.map((data) => ({
             type: 'image_url',
             image_url: {
-              url: `data:image/jpeg;base64,${imageData}`,
+              url: `data:image/jpeg;base64,${data}`,
             },
-          },
+          })),
         ],
       });
 

@@ -34,14 +34,14 @@ Instructions:
   },
   VISION: {
     SYSTEM: `You are a helpful assistant that can see and analyze images. Your task is to:
-1. Describe overall content of the image
+1. Describe overall content of the images
 2. Describe some important details
 3. Focus on the main elements and important details
 4. The output is to provide context for other AI agent in the chain. Keep it short and concise.`,
 
     formatUserPrompt: (caption?: string) =>
       caption
-        ? `Here's an image and its caption: ${caption}. The goal is to provide context for other AI agent in the chain.`
-        : 'Please describe what you see in this image. Focus on the main elements and any notable details. User may want to ask about it later.',
+        ? `Here are images and its caption: ${caption}. The goal is to provide context for other AI agent in the chain.`
+        : 'Please describe what you see in the images. Focus on the main elements and any notable details. User may want to ask about it later.',
   },
 };
