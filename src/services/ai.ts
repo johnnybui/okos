@@ -4,41 +4,30 @@ import { PROMPTS } from '../prompts';
 import { IChatMessage } from '../types';
 
 export class AIService {
-  static async generateResponse(messages: IChatMessage[], lastSummary?: string, memory?: string) {
-    let modelMessages = [];
-
+  private static mergeSystemMessages(messages: string[]): SystemMessage[] {
     if (MODEL_PROVIDER === 'google') {
       // For Google, merge system messages into one
-      const systemPrompt = [
-        PROMPTS.CHAT.SYSTEM,
-        lastSummary && messages.length > CHAT_CONFIG.maxMessagesBeforeSummary
-          ? `Previous conversation summary: ${lastSummary}`
-          : '',
-        memory ? `Important user information:\n${memory}` : '',
-      ]
-        .filter(Boolean)
-        .join('\n\n');
-
-      modelMessages = [new SystemMessage(systemPrompt)];
-    } else {
-      // For other providers, keep system messages separate
-      modelMessages = [new SystemMessage(PROMPTS.CHAT.SYSTEM)];
-
-      if (messages.length > CHAT_CONFIG.maxMessagesBeforeSummary && lastSummary) {
-        modelMessages.push(new SystemMessage(`Previous conversation summary: ${lastSummary}`));
-      }
-
-      if (memory) {
-        modelMessages.push(new SystemMessage(`Important user information:\n${memory}`));
-      }
+      return [new SystemMessage(messages.filter(Boolean).join('\n\n'))];
     }
+    // For other providers, keep system messages separate
+    return messages.filter(Boolean).map((msg) => new SystemMessage(msg));
+  }
+
+  static async generateResponse(messages: IChatMessage[], lastSummary?: string, memory?: string) {
+    const systemMessages = this.mergeSystemMessages([
+      PROMPTS.CHAT.SYSTEM,
+      lastSummary && messages.length > CHAT_CONFIG.maxMessagesBeforeSummary
+        ? `Previous conversation summary: ${lastSummary}`
+        : '',
+      memory ? `Important user information:\n${memory}` : '',
+    ]);
 
     const conversationMessages =
       messages.length > CHAT_CONFIG.maxMessagesBeforeSummary && lastSummary
         ? messages.slice(-CHAT_CONFIG.messagesWithSummary)
         : messages.slice(-CHAT_CONFIG.messagesToKeep);
 
-    modelMessages = modelMessages.concat(
+    const modelMessages = systemMessages.concat(
       conversationMessages.map((msg) =>
         msg.role === 'user'
           ? new HumanMessage(msg.content)
@@ -53,48 +42,30 @@ export class AIService {
   }
 
   static async generateSummary(messages: IChatMessage[], lastSummary?: string) {
-    let modelMessages = [];
+    const systemMessages = this.mergeSystemMessages([
+      PROMPTS.SUMMARY.SYSTEM,
+      lastSummary ? `Previous summary: ${lastSummary}` : '',
+    ]);
 
-    if (MODEL_PROVIDER === 'google') {
-      // For Google, merge system messages into one
-      const systemPrompt = [PROMPTS.SUMMARY.SYSTEM, lastSummary ? `Previous summary: ${lastSummary}` : '']
-        .filter(Boolean)
-        .join('\n\n');
-
-      modelMessages = [new SystemMessage(systemPrompt)];
-    } else {
-      // For other providers, keep system messages separate
-      modelMessages = [
-        new SystemMessage(PROMPTS.SUMMARY.SYSTEM),
-        ...(lastSummary ? [new SystemMessage(`Previous summary: ${lastSummary}`)] : []),
-      ];
-    }
-
-    modelMessages.push(new HumanMessage(messages.map((msg) => `${msg.role}: ${msg.content}`).join('\n')));
+    const modelMessages = [
+      ...systemMessages,
+      new HumanMessage(messages.map((msg) => `${msg.role}: ${msg.content}`).join('\n')),
+    ];
 
     const response = await summarizeModel.invoke(modelMessages);
     return response.content.toString();
   }
 
   static async generateMemory(messages: IChatMessage[], existingMemory?: string) {
-    let modelMessages = [];
+    const systemMessages = this.mergeSystemMessages([
+      PROMPTS.MEMORY.SYSTEM,
+      existingMemory ? `Existing memory: ${existingMemory}` : '',
+    ]);
 
-    if (MODEL_PROVIDER === 'google') {
-      // For Google, merge system messages into one
-      const systemPrompt = [PROMPTS.MEMORY.SYSTEM, existingMemory ? `Existing memory: ${existingMemory}` : '']
-        .filter(Boolean)
-        .join('\n\n');
-
-      modelMessages = [new SystemMessage(systemPrompt)];
-    } else {
-      // For other providers, keep system messages separate
-      modelMessages = [
-        new SystemMessage(PROMPTS.MEMORY.SYSTEM),
-        ...(existingMemory ? [new SystemMessage(`Existing memory: ${existingMemory}`)] : []),
-      ];
-    }
-
-    modelMessages.push(new HumanMessage(messages.map((msg) => `${msg.role}: ${msg.content}`).join('\n')));
+    const modelMessages = [
+      ...systemMessages,
+      new HumanMessage(messages.map((msg) => `${msg.role}: ${msg.content}`).join('\n')),
+    ];
 
     const response = await summarizeModel.invoke(modelMessages);
     return response.content.toString();
@@ -150,6 +121,6 @@ export class AIService {
       return imageContext || 'User uploaded a photo but we could not analyze it.';
     }
 
-    return 'User uploaded a photo but current LLM does not support image analysis.';
+    return 'Image analysis is not supported for the current model provider.';
   }
 }

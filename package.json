@@ -13,8 +13,10 @@
     "start": "node dist/index.js",
     "build:ollama": "docker compose -f ./docker-compose-ollama.yml build",
     "build:cloud": "docker compose -f ./docker-compose-cloud.yml build",
-    "start:ollama": "docker compose -f ./docker-compose-ollama.yml up -d",
-    "start:cloud": "docker compose -f ./docker-compose-cloud.yml up -d"
+    "up:ollama": "docker compose -f ./docker-compose-ollama.yml up -d",
+    "up:cloud": "docker compose -f ./docker-compose-cloud.yml up -d",
+    "down:ollama": "docker compose -f ./docker-compose-ollama.yml down",
+    "down:cloud": "docker compose -f ./docker-compose-cloud.yml down"
   },
   "dependencies": {
     "@langchain/community": "^0.3.18",

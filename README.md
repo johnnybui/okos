@@ -77,7 +77,7 @@ Includes Ollama for local LLM inference:
 yarn build:ollama
 
 # Start services
-yarn start:ollama
+yarn up:ollama
 ```
 
 ### 2. Cloud Deployment
@@ -89,7 +89,7 @@ Uses cloud AI providers (OpenAI, Google, or Groq):
 yarn build:cloud
 
 # Start services
-yarn start:cloud
+yarn up:cloud
 ```
 
 ## Environment Variables
