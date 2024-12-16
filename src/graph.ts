@@ -47,7 +47,7 @@ const processUserInput = async (context: typeof ChatContext.State): Promise<ICha
 const generateResponse = async (context: typeof ChatContext.State): Promise<IChatContext> => {
   const { state, chatId } = context;
 
-  await TelegramService.sendChatAction(chatId, 'typing');
+  TelegramService.sendChatAction(chatId, 'typing');
   const responseContent = await AIService.generateResponse(chatId, state.messages, state.lastSummary, state.memory);
   state.messages.push({ role: 'assistant', content: responseContent });
 

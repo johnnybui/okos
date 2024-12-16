@@ -2,7 +2,6 @@ import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { RunnableLambda } from '@langchain/core/runnables';
 import axios from 'axios';
-import TelegramBot from 'node-telegram-bot-api';
 import {
   CHAT_CONFIG,
   chatModel,
@@ -44,26 +43,26 @@ export class AIService {
         ? messages.slice(-CHAT_CONFIG.messagesWithSummary)
         : messages.slice(-CHAT_CONFIG.messagesToKeep);
 
-    let searchingStickerMsg: TelegramBot.Message | undefined;
-
     const toolChain = RunnableLambda.from(async (messages: IChatMessage[]) => {
       const aiMsg = await chain.invoke({ systemPrompt: systemMessage, messages });
 
       if (aiMsg.tool_calls?.length) {
-        searchingStickerMsg = await TelegramService.sendSticker(chatId, STICKER.SEARCHING);
-        const toolMsgs = await searchTool.batch(aiMsg.tool_calls);
+        const searchingStickerMsg = await TelegramService.sendSticker(chatId, STICKER.SEARCHING);
 
-        return chain.invoke({ systemPrompt: systemMessage, messages: [...messages, aiMsg, ...toolMsgs] });
+        const toolMsgs = await searchTool.batch(aiMsg.tool_calls);
+        const aiWithToolMsg = await chain.invoke({
+          systemPrompt: systemMessage,
+          messages: [...messages, aiMsg, ...toolMsgs],
+        });
+
+        TelegramService.deleteMessage(chatId, searchingStickerMsg.message_id);
+        return aiWithToolMsg;
       }
 
       return aiMsg;
     });
 
     const response = await toolChain.invoke(conversationMessages);
-    if (searchingStickerMsg?.message_id) {
-      TelegramService.deleteMessage(chatId, searchingStickerMsg.message_id);
-    }
-
     return response.content.toString();
   }
 
