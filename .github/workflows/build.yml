@@ -39,3 +39,72 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ env.DOCKER_IMAGE }}:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ vars.SERVER_HOST }}
+          port: ${{ vars.SERVER_PORT }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_PEM_KEY }}
+          script_stop: true
+          script: |
+            mkdir -p ${{ vars.SERVER_PROJECT_PATH }}
+            cd ${{ vars.SERVER_PROJECT_PATH }}
+
+      - name: Copy docker-compose.yml to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ vars.SERVER_HOST }}
+          port: ${{ vars.SERVER_PORT }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_PEM_KEY }}
+          source: 'docker-compose.yml'
+          target: '${{ vars.SERVER_PROJECT_PATH }}'
+
+      - name: Start containers
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ vars.SERVER_HOST }}
+          port: ${{ vars.SERVER_PORT }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_PEM_KEY }}
+          command_timeout: 15m
+          script: |
+            cd ${{ vars.SERVER_PROJECT_PATH }}
+
+            # Login to GitHub Container Registry
+            echo ${{ secrets.PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Pull the latest image
+            echo "Pulling latest image..."
+            docker compose pull
+
+            # Perform rolling update
+            echo "Performing rolling update..."
+            docker compose up -d
+
+            echo "Cleaning up dangling images..."
+            docker image prune -f
+
+      - name: Send Telegram Notification
+        if: always()
+        uses: appleboy/telegram-action@v0.1.1
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            🚀 Deployment Status: ${{ job.status }}
+
+            Repository: ${{ github.repository }}
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+
+            Triggered by: ${{ github.actor }}

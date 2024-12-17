@@ -1,0 +1,32 @@
+services:
+  bot:
+    image: ghcr.io/johnnybui/okos
+    container_name: okos
+    env_file: .env.docker
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - PORT=11435
+    ports:
+      - '11435:11435'
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - okos-network
+
+  redis:
+    image: redis
+    container_name: okos-redis
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - okos-network
+
+volumes:
+  redis-data:
+
+networks:
+  okos-network:
+    driver: bridge
