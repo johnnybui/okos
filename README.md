@@ -23,6 +23,14 @@ Okos is a Telegram AI Assistant built with TypeScript, LangGraph, and multiple A
 - Redis server
 - Ollama with Llama model installed (for Ollama model provider)
 
+## Prebuilt Docker Image
+
+```
+ghcr.io/johnnybui/okos
+```
+
+Platforms: `amd64` and `arm64`
+
 ## Setup
 
 1. Clone the repository
@@ -67,31 +75,43 @@ yarn start
 
 ## Docker Deployment
 
-Two deployment options are available:
+You can deploy using one of two options:
 
 ### 1. Local Deployment with Ollama
 
-Includes Ollama for local LLM inference:
+For local LLM inference:
 
-```bash
-# Build containers
-yarn build:ollama
-
-# Start services
-yarn up:ollama
-```
+1. **Build Containers** (optional):  
+   Use the command below to build the containers. Alternatively, to use a prebuilt image, edit the `docker-compose` file, replacing the `build: .` line with:
+   ```yaml
+   image: ghcr.io/johnnybui/okos
+   ```
+   Run build:
+   ```bash
+   yarn build:ollama
+   ```
+2. **Start Services**:
+   ```bash
+   yarn up:ollama
+   ```
 
 ### 2. Cloud Deployment
 
-Uses cloud AI providers (OpenAI, Google, or Groq):
+For cloud-based AI providers (OpenAI, Google, Groq):
 
-```bash
-# Build containers
-yarn build:cloud
-
-# Start services
-yarn up:cloud
-```
+1. **Build Containers** (optional):  
+   Similar to local deployment, replace `build: .` in the `docker-compose` file with the prebuilt image if desired:
+   ```yaml
+   image: ghcr.io/johnnybui/okos
+   ```
+   Run build:
+   ```bash
+   yarn build:cloud
+   ```
+2. **Start Services**:
+   ```bash
+   yarn up:cloud
+   ```
 
 ## Environment Variables
 
