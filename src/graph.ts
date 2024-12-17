@@ -51,7 +51,9 @@ const generateResponse = async (context: typeof ChatContext.State): Promise<ICha
   const responseContent = await AIService.generateResponse(chatId, state.messages, state.lastSummary, state.memory);
   state.messages.push({ role: 'assistant', content: responseContent });
 
-  await Promise.all([TelegramService.sendMessage(chatId, responseContent), redisService.saveState(chatId, state)]);
+  if (responseContent) {
+    await Promise.all([TelegramService.sendMessage(chatId, responseContent), redisService.saveState(chatId, state)]);
+  }
 
   return { state: { ...state, messages: state.messages }, chatId };
 };

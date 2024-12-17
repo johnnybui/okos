@@ -48,6 +48,7 @@ export class AIService {
 
       if (aiMsg.tool_calls?.length) {
         const searchingStickerMsg = await TelegramService.sendSticker(chatId, STICKER.SEARCHING);
+        TelegramService.sendChatAction(chatId, 'typing');
 
         const toolMsgs = await searchTool.batch(aiMsg.tool_calls);
         const aiWithToolMsg = await chain.invoke({

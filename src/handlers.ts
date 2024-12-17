@@ -55,8 +55,8 @@ export async function handlePhoto(chatId: number, photos: TelegramBot.PhotoSize[
         .map((photo) => TelegramService.getInstance().getFileLink(photo.file_id))
     );
 
-    await TelegramService.sendChatAction(chatId, 'typing');
     const pleaseWaitStickerMsg = await TelegramService.sendSticker(chatId, STICKER.WAIT);
+    TelegramService.sendChatAction(chatId, 'typing');
 
     const analysis = await AIService.analyzeImage(fileLinks, caption);
     let messageText = caption
