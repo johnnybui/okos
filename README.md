@@ -119,7 +119,9 @@ For cloud-based AI providers (OpenAI, Google, Groq):
 
 - `TELEGRAM_BOT_TOKEN`: Telegram Bot token
 - `MODEL_PROVIDER`: AI model provider ('ollama', 'google', 'groq', or 'openai')
+- `SEARCH_PROVIDER`: Search provider ('tavily' or 'brave')
 - `TAVILY_API_KEY`: Tavily API key for internet searching
+- `BRAVE_SEARCH_API_KEY`: Brave Search API key for internet searching
 - `REDIS_URL`: Redis connection URL
 
 ### Provider-Specific
