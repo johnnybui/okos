@@ -60,8 +60,8 @@ export async function handlePhoto(chatId: number, photos: TelegramBot.PhotoSize[
 
     const analysis = await AIService.analyzeImage(fileLinks, caption);
     let messageText = caption
-      ? `Inline System Prompt: \n\n [User sent you ${fileLinks.length} Photo(s) with caption: "${caption}"]\n\nPhoto(s) are analyzed by another AI agent and are about: ${analysis}`
-      : `Inline System Prompt: \n\n [User sent you ${fileLinks.length} Photo(s)]\n\nPhoto(s) are analyzed by another AI agent and are about: ${analysis}`;
+      ? `Inline System Prompt: \n\n [User shared you ${fileLinks.length} Photo(s) along with message: "${caption}"]\n\nPhoto(s) are analyzed by another AI agent and are about: ${analysis}`
+      : `Inline System Prompt: \n\n [User shared you ${fileLinks.length} Photo(s) without any message]\n\nPhoto(s) are analyzed by another AI agent and are about: ${analysis}`;
 
     if (photos.length > fileLinks.length) {
       messageText += `\n\n Tell user that you only analyzed the first ${fileLinks.length} photos.`;
