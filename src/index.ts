@@ -19,7 +19,7 @@ app.listen(port, () => {
   console.log(`Health check server listening on port ${port}`);
 });
 
-bot.on('message', async (msg) => {
+bot.on('text', async (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text;
 

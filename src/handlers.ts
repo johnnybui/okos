@@ -4,6 +4,7 @@ import { createChatGraph } from './graph';
 import { AIService } from './services/ai';
 import { RedisService } from './services/redis';
 import TelegramService from './services/telegram';
+import { pickRandomElement } from './utils';
 
 const redisService = new RedisService();
 const graph = createChatGraph();
@@ -13,7 +14,7 @@ export async function handleMessage(chatId: number, text: string) {
     const isLimited = await redisService.isRateLimited(chatId, 'message', CHAT_CONFIG.messageCooldownSeconds);
 
     if (isLimited) {
-      await TelegramService.sendSticker(chatId, STICKER.WRITING);
+      await TelegramService.sendSticker(chatId, pickRandomElement(STICKER.WRITING));
       return;
     }
 
@@ -45,7 +46,7 @@ export async function handlePhoto(chatId: number, photos: TelegramBot.PhotoSize[
     const isLimited = await redisService.isRateLimited(chatId, 'photo', CHAT_CONFIG.photoCooldownSeconds);
 
     if (isLimited) {
-      await TelegramService.sendSticker(chatId, STICKER.CALM_DOWN);
+      await TelegramService.sendSticker(chatId, pickRandomElement(STICKER.CALM_DOWN));
       return;
     }
 
@@ -55,13 +56,14 @@ export async function handlePhoto(chatId: number, photos: TelegramBot.PhotoSize[
         .map((photo) => TelegramService.getInstance().getFileLink(photo.file_id))
     );
 
-    const pleaseWaitStickerMsg = await TelegramService.sendSticker(chatId, STICKER.WAIT);
+    const pleaseWaitStickerMsg = await TelegramService.sendSticker(chatId, pickRandomElement(STICKER.WAIT));
     TelegramService.sendChatAction(chatId, 'typing');
 
     const analysis = await AIService.analyzeImage(fileLinks, caption);
+    const additionalInstructions = `Additional System Prompt (this instruction is in English but you must respond in language that user is speaking)`;
     let messageText = caption
-      ? `Inline System Prompt: \n\n [User shared you ${fileLinks.length} Photo(s) along with message: "${caption}"]\n\nPhoto(s) are analyzed by another AI agent and are about: ${analysis}`
-      : `Inline System Prompt: \n\n [User shared you ${fileLinks.length} Photo(s) without any message]\n\nPhoto(s) are analyzed by another AI agent and are about: ${analysis}`;
+      ? `${additionalInstructions}: \n\n [User shared you ${fileLinks.length} Photo(s) along with message: "${caption}"]\n\nPhoto(s) are analyzed by another AI agent and are about: ${analysis}`
+      : `${additionalInstructions}: \n\n [User shared you ${fileLinks.length} Photo(s) without any message]\n\nPhoto(s) are analyzed by another AI agent and are about: ${analysis}`;
 
     if (photos.length > fileLinks.length) {
       messageText += `\n\n Tell user that you only analyzed the first ${fileLinks.length} photos.`;

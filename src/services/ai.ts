@@ -15,6 +15,7 @@ import {
 import { PROMPTS } from '../prompts';
 import { searchTool } from '../tools';
 import { IChatMessage } from '../types';
+import { pickRandomElement } from '../utils';
 import TelegramService from './telegram';
 
 export class AIService {
@@ -47,7 +48,7 @@ export class AIService {
       const aiMsg = await chain.invoke({ systemPrompt: systemMessage, messages });
 
       if (aiMsg.tool_calls?.length) {
-        const searchingStickerMsg = await TelegramService.sendSticker(chatId, STICKER.SEARCHING);
+        const searchingStickerMsg = await TelegramService.sendSticker(chatId, pickRandomElement(STICKER.SEARCHING));
         TelegramService.sendChatAction(chatId, 'typing');
 
         const toolMsgs = await searchTool.batch(aiMsg.tool_calls);
