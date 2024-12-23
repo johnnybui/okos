@@ -4,9 +4,11 @@ import { ChatOllama } from '@langchain/ollama';
 import { ChatOpenAI } from '@langchain/openai';
 import dotenv from 'dotenv';
 import Groq from 'groq-sdk';
-import { searchTool } from './tools';
+import { RedisService } from './services/redis';
 
 dotenv.config();
+
+export const redisService = new RedisService();
 
 if (!process.env.TELEGRAM_BOT_TOKEN) {
   throw new Error('TELEGRAM_BOT_TOKEN is not set in environment variables');
@@ -21,7 +23,7 @@ export const MODEL_PROVIDER = (process.env.MODEL_PROVIDER || 'ollama') as ModelP
 export const MODEL_VISION_PROVIDER = (process.env.MODEL_VISION_PROVIDER || MODEL_PROVIDER) as ModelProvider;
 export const MODEL_TOOL_PROVIDER = (process.env.MODEL_TOOL_PROVIDER || MODEL_PROVIDER) as ModelProvider;
 
-function createChatModel(type: 'chat' | 'summary' | 'vision') {
+function createChatModel(type: 'chat' | 'tool' | 'vision') {
   const temperature = type === 'chat' ? 0.7 : 0;
 
   switch (type) {
@@ -60,7 +62,7 @@ function createChatModel(type: 'chat' | 'summary' | 'vision') {
       }
     }
 
-    case 'summary': {
+    case 'tool': {
       const provider = MODEL_TOOL_PROVIDER || MODEL_PROVIDER;
       switch (provider) {
         case 'openai':
@@ -135,13 +137,14 @@ function createChatModel(type: 'chat' | 'summary' | 'vision') {
           break;
       }
 
-      return chatModel.bindTools([searchTool]);
+      return chatModel;
     }
   }
 }
 
 export const chatModel = createChatModel('chat');
-export const summarizeModel = createChatModel('summary');
+export const classifierModel = createChatModel('tool');
+export const summarizeModel = createChatModel('tool');
 export const visionModel = createChatModel('vision');
 
 export const nativeGroqClient = new Groq({

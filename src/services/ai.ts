@@ -1,29 +1,76 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { RunnableLambda } from '@langchain/core/runnables';
 import axios from 'axios';
 import {
   CHAT_CONFIG,
   chatModel,
+  classifierModel,
   MODEL_PROVIDER,
   MODEL_VISION_PROVIDER,
   nativeGroqClient,
-  STICKER,
   summarizeModel,
   visionModel,
 } from '../config';
 import { PROMPTS } from '../prompts';
-import { searchTool } from '../tools';
-import { IChatMessage } from '../types';
-import { pickRandomElement } from '../utils';
-import TelegramService from './telegram';
+import { ChatClassifierSchema, IChatMessage } from '../types';
 
 export class AIService {
-  private static mergeSystemMessages(messages: string[]): SystemMessage {
-    return new SystemMessage(messages.filter(Boolean).join('\n\n'));
+  private static mergeSystemMessages(messages: string[], forPromptTemplate = false): SystemMessage | string {
+    return forPromptTemplate
+      ? messages.filter(Boolean).join('\n\n')
+      : new SystemMessage(messages.filter(Boolean).join('\n\n'));
   }
 
-  static async generateResponse(chatId: number, messages: IChatMessage[], lastSummary?: string, memory?: string) {
+  static async classifyInput(messages: IChatMessage[], lastSummary?: string, memory?: string) {
+    const prompt = ChatPromptTemplate.fromMessages([
+      ['system', '{systemPrompt}'],
+      ['placeholder', '{messages}'],
+    ]);
+
+    const model = classifierModel.withStructuredOutput(ChatClassifierSchema);
+    const chain = prompt.pipe(model);
+
+    const systemMessage = this.mergeSystemMessages(
+      [
+        PROMPTS.CLASSIFY.SYSTEM,
+        lastSummary && messages.length > CHAT_CONFIG.maxMessagesBeforeSummary
+          ? `- Previous conversation summary:
+  <summary>
+  ${lastSummary}
+  </summary>`
+          : '',
+        memory
+          ? `- Important user information:
+  <memory>
+  ${memory}
+  </memory>`
+          : '',
+      ],
+      true
+    );
+
+    const conversationMessages =
+      messages.length > CHAT_CONFIG.maxMessagesBeforeSummary && lastSummary
+        ? messages.slice(-CHAT_CONFIG.messagesWithSummary)
+        : messages.slice(-CHAT_CONFIG.messagesToKeep);
+
+    const response = await chain.invoke({ systemPrompt: systemMessage, messages: conversationMessages });
+    return response;
+  }
+
+  static async generateResponse({
+    messages,
+    lastSummary,
+    memory,
+    searchResults,
+    thingsDone,
+  }: {
+    messages: IChatMessage[];
+    lastSummary?: string;
+    memory?: string;
+    searchResults?: string[];
+    thingsDone?: string[];
+  }) {
     const prompt = ChatPromptTemplate.fromMessages([
       ['system', '{systemPrompt}'],
       ['placeholder', '{messages}'],
@@ -31,47 +78,56 @@ export class AIService {
 
     const chain = prompt.pipe(chatModel);
 
-    const systemMessage = this.mergeSystemMessages([
-      PROMPTS.CHAT.SYSTEM,
-      lastSummary && messages.length > CHAT_CONFIG.maxMessagesBeforeSummary
-        ? `Previous conversation summary: ${lastSummary}`
-        : '',
-      memory ? `Important user information:\n${memory}` : '',
-    ]);
+    const systemMessage = this.mergeSystemMessages(
+      [
+        PROMPTS.CHAT.SYSTEM,
+        lastSummary && messages.length > CHAT_CONFIG.maxMessagesBeforeSummary
+          ? `- Previous conversation summary:
+  <summary>
+  ${lastSummary}
+  </summary>`
+          : '',
+        memory
+          ? `- Important user information:
+  <memory>
+  ${memory}
+  </memory>`
+          : '',
+        searchResults
+          ? `- Search results from other AI Agent:
+  <searchResults>
+  ${searchResults}
+  </searchResults>`
+          : '',
+        thingsDone
+          ? `- Things done by other AI Agents:
+  <thingsDone>
+  ${thingsDone.join('\n')}
+  </thingsDone>`
+          : '',
+      ],
+      true
+    );
 
     const conversationMessages =
       messages.length > CHAT_CONFIG.maxMessagesBeforeSummary && lastSummary
         ? messages.slice(-CHAT_CONFIG.messagesWithSummary)
         : messages.slice(-CHAT_CONFIG.messagesToKeep);
 
-    const toolChain = RunnableLambda.from(async (messages: IChatMessage[]) => {
-      const aiMsg = await chain.invoke({ systemPrompt: systemMessage, messages });
+    const response = await chain.invoke({ systemPrompt: systemMessage, messages: conversationMessages });
 
-      if (aiMsg.tool_calls?.length) {
-        const searchingStickerMsg = await TelegramService.sendSticker(chatId, pickRandomElement(STICKER.SEARCHING));
-        TelegramService.sendChatAction(chatId, 'typing');
-
-        const toolMsgs = await searchTool.batch(aiMsg.tool_calls);
-        const aiWithToolMsg = await chain.invoke({
-          systemPrompt: systemMessage,
-          messages: [...messages, aiMsg, ...toolMsgs],
-        });
-
-        TelegramService.deleteMessage(chatId, searchingStickerMsg.message_id);
-        return aiWithToolMsg;
-      }
-
-      return aiMsg;
-    });
-
-    const response = await toolChain.invoke(conversationMessages);
     return response.content.toString();
   }
 
   static async generateSummary(messages: IChatMessage[], lastSummary?: string) {
     const systemMessage = this.mergeSystemMessages([
       PROMPTS.SUMMARY.SYSTEM,
-      lastSummary ? `Previous summary: ${lastSummary}` : '',
+      lastSummary
+        ? `Previous summary:
+  <summary>
+  ${lastSummary}
+  </summary>`
+        : '',
     ]);
 
     const modelMessages = [
@@ -86,7 +142,12 @@ export class AIService {
   static async generateMemory(messages: IChatMessage[], existingMemory?: string) {
     const systemMessage = this.mergeSystemMessages([
       PROMPTS.MEMORY.SYSTEM,
-      existingMemory ? `Existing memory: ${existingMemory}` : '',
+      existingMemory
+        ? `Existing memory:
+  <memory>
+  ${existingMemory}
+  </memory>`
+        : '',
     ]);
 
     const modelMessages = [
