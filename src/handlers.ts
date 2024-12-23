@@ -35,8 +35,13 @@ export async function handleMessage(chatId: number, text: string) {
       },
       { recursionLimit: 10, maxConcurrency: 3 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error processing message:', error);
+    if (error.status === 429) {
+      await TelegramService.sendMessage(chatId, 'You have exceeded the rate limit. Please try again later.');
+      return;
+    }
+
     await TelegramService.sendMessage(chatId, 'Sorry, there was an error processing your message.');
   }
 }
@@ -71,8 +76,13 @@ export async function handlePhoto(chatId: number, photos: TelegramBot.PhotoSize[
 
     await handleMessage(chatId, messageText);
     TelegramService.deleteMessage(chatId, pleaseWaitStickerMsg.message_id);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error processing photos:', error);
+    if (error.status === 429) {
+      await TelegramService.sendMessage(chatId, 'You have exceeded the rate limit. Please try again later.');
+      return;
+    }
+
     await TelegramService.sendMessage(chatId, 'Sorry, I had trouble analyzing that image. Please try again.');
   }
 }

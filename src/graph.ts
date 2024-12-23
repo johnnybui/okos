@@ -4,7 +4,7 @@ import { generateMemoryAgent } from './agents/generateMemory.agent';
 import { generateResponseAgent } from './agents/generateResponse.agent';
 import { generateSummaryAgent } from './agents/generateSummary.agent';
 import { performSearchAgent } from './agents/performSearch.agent';
-import { processUserInputAgent } from './agents/processUserInput.agent';
+import { prepareStateAgent } from './agents/prepareState.agent';
 import { ChatContext } from './types';
 
 const checkSearchNeeded = (context: typeof ChatContext.State): 'searchNeeded' | 'searchNotNeeded' => {
@@ -13,15 +13,15 @@ const checkSearchNeeded = (context: typeof ChatContext.State): 'searchNeeded' | 
 
 export const createChatGraph = () => {
   const graph = new StateGraph(ChatContext)
-    .addNode('processUserInputAgent', processUserInputAgent)
+    .addNode('prepareStateAgent', prepareStateAgent)
     .addNode('classifyUserInputAgent', classifyUserInputAgent)
     .addNode('performSearchAgent', performSearchAgent)
     .addNode('generateResponseAgent', generateResponseAgent)
     .addNode('generateSummaryAgent', generateSummaryAgent)
     .addNode('generateMemoryAgent', generateMemoryAgent)
 
-    .addEdge(START, 'processUserInputAgent')
-    .addEdge('processUserInputAgent', 'classifyUserInputAgent')
+    .addEdge(START, 'prepareStateAgent')
+    .addEdge('prepareStateAgent', 'classifyUserInputAgent')
 
     .addConditionalEdges('classifyUserInputAgent', checkSearchNeeded, {
       searchNeeded: 'performSearchAgent',

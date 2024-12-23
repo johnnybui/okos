@@ -121,7 +121,7 @@ function createChatModel(type: 'chat' | 'tool' | 'vision') {
         case 'groq':
           chatModel = new ChatGroq({
             apiKey: process.env.GROQ_API_KEY!,
-            modelName: process.env.GROQ_MODEL_NAME || 'llama-3.3-70b-versatile',
+            modelName: process.env.GROQ_MODEL_NAME || 'gemma2-9b-it',
             temperature,
             maxRetries: 2,
           });

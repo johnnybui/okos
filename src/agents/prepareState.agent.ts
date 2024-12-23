@@ -1,7 +1,7 @@
 import { redisService } from '../config';
 import { ChatContext, IChatContext } from '../types';
 
-export const processUserInputAgent = async (context: typeof ChatContext.State): Promise<IChatContext> => {
+export const prepareStateAgent = async (context: typeof ChatContext.State): Promise<IChatContext> => {
   const { state, chatId } = context;
 
   if (!state.messages) {
