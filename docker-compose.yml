@@ -18,14 +18,11 @@ services:
     image: redis
     container_name: okos-redis
     volumes:
-      - redis-data:/data
+      - ./redis-data:/data
     command: redis-server --appendonly yes
     restart: unless-stopped
     networks:
       - okos-network
-
-volumes:
-  redis-data:
 
 networks:
   okos-network:
