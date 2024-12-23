@@ -35,7 +35,8 @@ ${state.memory}
         ? `- Search results from other AI Agent:
 <searchResults>
 ${searchResults}
-</searchResults>`
+</searchResults>
+- If user is searching for something, output answer must include suitable search results into the response as readable text and url, not markdown.`
         : '',
       thingsDone
         ? `- Things done by other AI Agents:
