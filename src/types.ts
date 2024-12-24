@@ -37,6 +37,6 @@ export const ChatContext = Annotation.Root({
 });
 
 export const ChatClassifierSchema = z.object({
-  searchNeeded: z.boolean().optional().describe('Whether a internet search is needed to answer this question'),
-  searchQuery: z.string().optional().describe('The query that will be used to search'),
+  searchNeeded: z.boolean().describe('Whether a internet search is needed to answer this question'),
+  searchQuery: z.string().describe('The query that will be used to search'),
 });

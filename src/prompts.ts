@@ -38,7 +38,8 @@ Instructions:
 1. If there's a previous summary, integrate it with the new messages to create a coherent summary
 2. Focus on key points, decisions, and important context
 3. Maintain chronological order of important events
-4. Output maximum about 10 bullet points, always have the last bullet point to tell about the current unresolved inquiry. Keep the summary concise but informative, not too long for a LLM system prompt`,
+4. For lists, avoid special characters that conflict with Markdown, such as *, to prevent formatting errors. Use numbers (e.g., 1., 2., 3.) or plain text (e.g., "-", "+") instead.
+5. Output maximum about 10 bullet points, always have the last bullet point to tell about the current unresolved inquiry. Keep the summary concise but informative, not too long for a LLM system prompt`,
 
     formatUserPrompt: (lastSummary: string | undefined, messages: string) =>
       `${lastSummary ? `Previous summary:\n${lastSummary}\n\nNew messages to integrate:\n` : ''}${messages}`,
@@ -54,9 +55,10 @@ Instructions:
    - Important decisions or requests
    - Recurring topics or patterns
 3. Format as clear, concise bullet points
-4. Keep only truly important, long-term relevant information
-5. Exclude temporary, large generated code/response or contextual information that belongs in the summary
-6. Maximum 10 bullet points to stay focused on key information`,
+4. For lists, avoid special characters that conflict with Markdown, such as *, to prevent formatting errors. Use numbers (e.g., 1., 2., 3.) or plain text (e.g., "-", "+") instead.
+5. Keep only truly important, long-term relevant information
+6. Exclude temporary, large generated code/response or contextual information that belongs in the summary
+7. Output maximum 10 bullet points to stay focused on key information`,
 
     formatUserPrompt: (existingMemory: string | undefined, messages: string) =>
       `${existingMemory ? `Existing memory:\n${existingMemory}\n\nNew messages to analyze:\n` : ''}${messages}`,
