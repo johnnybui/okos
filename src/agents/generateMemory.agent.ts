@@ -22,7 +22,7 @@ export const generateMemoryAgent = async (context: typeof ChatContext.State): Pr
 
     const modelMessages = [
       systemMessage,
-      new HumanMessage(state.messages.map((msg) => `${msg.role}: ${msg.content}`).join('\n')),
+      new HumanMessage(state.messages.map((msg) => `<${msg.role}>\n${msg.content}\n</${msg.role}>`).join('\n')),
     ];
 
     const response = await summarizeModel.invoke(modelMessages);
