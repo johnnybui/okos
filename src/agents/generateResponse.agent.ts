@@ -1,9 +1,11 @@
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import TelegramBot from 'node-telegram-bot-api';
 import { CHAT_CONFIG, chatModel, redisService } from '../config';
 import { PROMPTS } from '../prompts';
 import { AIService } from '../services/ai';
 import TelegramService from '../services/telegram';
 import { ChatContext, IChatContext } from '../types';
+import { isMarkdown } from '../utils';
 
 export const generateResponseAgent = async (context: typeof ChatContext.State): Promise<IChatContext> => {
   const { state, chatId, searchResults, thingsDone } = context;
@@ -58,8 +60,16 @@ ${thingsDone.join('\n')}
 
   state.messages.push({ role: 'assistant', content: responseContent });
 
+  const options: TelegramBot.SendMessageOptions = {};
+  if (isMarkdown(responseContent)) {
+    options.parse_mode = 'Markdown';
+  }
+
   if (responseContent) {
-    await Promise.all([TelegramService.sendMessage(chatId, responseContent), redisService.saveState(chatId, state)]);
+    await Promise.all([
+      TelegramService.sendMessage(chatId, responseContent, options),
+      redisService.saveState(chatId, state),
+    ]);
   }
 
   return { state: { ...state, messages: state.messages }, chatId };

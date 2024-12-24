@@ -12,9 +12,13 @@ class TelegramService {
     return TelegramService.instance;
   }
 
-  static async sendMessage(chatId: number, message: string): Promise<TelegramBot.Message> {
+  static async sendMessage(
+    chatId: number,
+    message: string,
+    options?: TelegramBot.SendMessageOptions
+  ): Promise<TelegramBot.Message> {
     const bot = TelegramService.getInstance();
-    return await bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+    return await bot.sendMessage(chatId, message, options);
   }
 
   static async sendChatAction(chatId: number, action: TelegramBot.ChatAction): Promise<boolean> {
