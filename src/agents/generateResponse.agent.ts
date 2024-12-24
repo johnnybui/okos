@@ -67,7 +67,19 @@ ${thingsDone.join('\n')}
 
   if (responseContent) {
     await Promise.all([
-      TelegramService.sendMessage(chatId, responseContent, options),
+      (async () => {
+        try {
+          await TelegramService.sendMessage(chatId, responseContent, options);
+        } catch (error) {
+          try {
+            // Retry without options
+            await TelegramService.sendMessage(chatId, responseContent);
+          } catch (retryError) {
+            // If still fails, throw the error
+            throw retryError;
+          }
+        }
+      })(),
       redisService.saveState(chatId, state),
     ]);
   }

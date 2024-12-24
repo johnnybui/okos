@@ -14,7 +14,13 @@ export const performSearchAgent = async (context: typeof ChatContext.State): Pro
   const searchingStickerMsg = await TelegramService.sendSticker(chatId, pickRandomElement(STICKER.SEARCHING));
   TelegramService.sendChatAction(chatId, 'typing');
 
-  const searchResults = await searchTool.invoke(searchQuery);
+  let searchResults;
+  try {
+    searchResults = await searchTool.invoke(searchQuery);
+  } catch (error) {
+    console.error('Error performing search:', error);
+    searchResults = 'There was an error performing the search. Tell user to try again later.';
+  }
 
   TelegramService.deleteMessage(chatId, searchingStickerMsg.message_id);
 
