@@ -36,7 +36,7 @@ ${state.memory}
 <searchResults>
 ${searchResults}
 </searchResults>
-- If user is searching for something, output answer must include suitable search results into the response as readable text and url, not markdown.`
+- The search results are for your reference to answer user's question or provide links to user when needed.`
         : '',
       thingsDone
         ? `- Things done by other AI Agents:
