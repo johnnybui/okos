@@ -20,8 +20,6 @@ app.get('/', (req, res) => {
 // Webhook endpoint (only used if TELEGRAM_WEBHOOK_URL is set)
 if (process.env.TELEGRAM_WEBHOOK_URL) {
   app.post('/webhook', (req, res) => {
-    console.log('Telegram webhook received', req.body);
-
     bot.processUpdate(req.body);
     res.sendStatus(200);
   });
