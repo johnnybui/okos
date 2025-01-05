@@ -8,9 +8,7 @@ class TelegramService {
       const webHookUrl = process.env.TELEGRAM_WEBHOOK_URL?.replace(/\/$/, ''); // Remove trailing slash if present
       const options: TelegramBot.ConstructorOptions = webHookUrl
         ? {
-            webHook: {
-              port: undefined, // Don't start server, we'll use Express
-            },
+            webHook: true,
           }
         : {
             polling: true,

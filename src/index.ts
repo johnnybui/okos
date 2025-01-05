@@ -13,8 +13,14 @@ const bot = TelegramService.getInstance();
 app.use(express.json());
 
 // Health check endpoint
-app.get('/', (req, res) => {
-  res.send('OK');
+app.get('/', async (req, res) => {
+  const isPolling = await bot.isPolling();
+  const botUser = await bot.getMe();
+  res.send(
+    `<a href="https://t.me/${botUser.username}">${botUser.username}</a> is online!<br />Mode: ${
+      isPolling ? 'Polling' : 'Webhook'
+    }`
+  );
 });
 
 // Webhook endpoint (only used if TELEGRAM_WEBHOOK_URL is set)
