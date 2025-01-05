@@ -5,9 +5,38 @@ class TelegramService {
 
   static getInstance(): TelegramBot {
     if (!TelegramService.instance) {
-      TelegramService.instance = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, {
-        polling: true,
-      });
+      const webHookUrl = process.env.TELEGRAM_WEBHOOK_URL?.replace(/\/$/, ''); // Remove trailing slash if present
+      const options: TelegramBot.ConstructorOptions = webHookUrl
+        ? {
+            webHook: {
+              port: undefined, // Don't start server, we'll use Express
+            },
+          }
+        : {
+            polling: true,
+          };
+
+      TelegramService.instance = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN!, options);
+
+      if (webHookUrl) {
+        // Set webhook if URL is provided
+        TelegramService.instance
+          .setWebHook(`${webHookUrl}/webhook`)
+          .then(() => {
+            console.log('Webhook set successfully to:', `${webHookUrl}/webhook`);
+            // Verify webhook info
+            return TelegramService.instance.getWebHookInfo();
+          })
+          .then((info) => {
+            console.log('Webhook info:', info);
+          })
+          .catch((error) => {
+            console.error('Error setting webhook:', error);
+          });
+        console.log('Telegram bot started with webhook mode');
+      } else {
+        console.log('Telegram bot started with polling mode');
+      }
     }
     return TelegramService.instance;
   }

@@ -9,14 +9,27 @@ const port = process.env.PORT || 11435;
 // Initialize bot using singleton
 const bot = TelegramService.getInstance();
 
+// Parse JSON bodies for webhook
+app.use(express.json());
+
 // Health check endpoint
 app.get('/', (req, res) => {
   res.send('OK');
 });
 
+// Webhook endpoint (only used if TELEGRAM_WEBHOOK_URL is set)
+if (process.env.TELEGRAM_WEBHOOK_URL) {
+  app.post('/webhook', (req, res) => {
+    console.log('Telegram webhook received', req.body);
+
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
+  });
+}
+
 // Start express server
 app.listen(port, () => {
-  console.log(`Health check server listening on port ${port}`);
+  console.log(`Server listening on port ${port}`);
 });
 
 bot.on('text', async (msg) => {
@@ -82,8 +95,16 @@ bot.on('sticker', async (msg) => {
 });
 
 // Handle errors
+bot.on('error', (error) => {
+  console.error('Bot error:', error);
+});
+
 bot.on('polling_error', (error) => {
   console.error('Polling error:', error);
+});
+
+bot.on('webhook_error', (error) => {
+  console.error('Webhook error:', error);
 });
 
 console.log('Telegram bot is running...');
