@@ -13,12 +13,12 @@ switch (process.env.SEARCH_PROVIDER) {
     break;
   case 'tavily':
     searchTool = new TavilySearchResults({
-      maxResults: 3,
+      maxResults: Number(process.env.SEARCH_MAX_RESULTS || 3),
     });
     break;
   case 'duckduckgo':
   default:
-    searchTool = new DuckDuckGoSearch({ maxResults: 3 });
+    searchTool = new DuckDuckGoSearch({ maxResults: Number(process.env.SEARCH_MAX_RESULTS || 3) });
 }
 
 export { searchTool };
