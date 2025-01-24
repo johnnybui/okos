@@ -6,7 +6,6 @@ on:
 
 env:
   CI: true
-  NODE_VERSION: 22.11.0
   DOCKER_IMAGE: ghcr.io/johnnybui/okos
 
 jobs:

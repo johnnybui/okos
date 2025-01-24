@@ -1,9 +1,6 @@
 import { BraveSearch } from '@langchain/community/tools/brave_search';
 import { DuckDuckGoSearch } from '@langchain/community/tools/duckduckgo_search';
 import { TavilySearchResults } from '@langchain/community/tools/tavily_search';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 let searchTool: BraveSearch | TavilySearchResults | DuckDuckGoSearch;
 

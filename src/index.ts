@@ -1,40 +1,39 @@
-import express from 'express';
 import TelegramBot from 'node-telegram-bot-api';
 import { handleMessage, handlePhoto } from './handlers';
 import TelegramService from './services/telegram';
 
-const app = express();
 const port = process.env.PORT || 11435;
 
 // Initialize bot using singleton
 const bot = TelegramService.getInstance();
 
-// Parse JSON bodies for webhook
-app.use(express.json());
+const server = Bun.serve({
+  port,
+  async fetch(req) {
+    const { pathname, searchParams } = new URL(req.url);
 
-// Health check endpoint
-app.get('/', async (req, res) => {
-  const isPolling = await bot.isPolling();
-  const botUser = await bot.getMe();
-  res.send(
-    `<a href="https://t.me/${botUser.username}">${botUser.username}</a> is online!<br />Mode: ${
-      isPolling ? 'Polling' : 'Webhook'
-    }`
-  );
+    if (req.method === 'GET' && pathname === '/') {
+      const isPolling = await bot.isPolling();
+      const botUser = await bot.getMe();
+      return new Response(
+        `<a href="https://t.me/${botUser.username}">${botUser.username}</a> is online!<br />Mode: ${
+          isPolling ? 'Polling' : 'Webhook'
+        }`,
+        { headers: { 'Content-Type': 'text/html' } }
+      );
+    }
+
+    if (process.env.TELEGRAM_WEBHOOK_URL && req.method === 'POST' && pathname === '/webhook') {
+      const body = await req.json();
+      bot.processUpdate(body);
+      return new Response(null, { status: 200 });
+    }
+
+    return new Response('Not Found', { status: 404 });
+  },
 });
 
-// Webhook endpoint (only used if TELEGRAM_WEBHOOK_URL is set)
-if (process.env.TELEGRAM_WEBHOOK_URL) {
-  app.post('/webhook', (req, res) => {
-    bot.processUpdate(req.body);
-    res.sendStatus(200);
-  });
-}
-
-// Start express server
-app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
-});
+console.log(`Server listening on port ${server.port}`);
 
 bot.on('text', async (msg) => {
   const chatId = msg.chat.id;
@@ -99,16 +98,16 @@ bot.on('sticker', async (msg) => {
 });
 
 // Handle errors
-bot.on('error', (error) => {
-  console.error('Bot error:', error);
-});
-
 bot.on('polling_error', (error) => {
   console.error('Polling error:', error);
 });
 
 bot.on('webhook_error', (error) => {
   console.error('Webhook error:', error);
+});
+
+bot.on('error', (error) => {
+  console.error('General error:', error);
 });
 
 console.log('Telegram bot is running...');

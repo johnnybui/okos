@@ -2,11 +2,8 @@ import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { ChatGroq } from '@langchain/groq';
 import { ChatOllama } from '@langchain/ollama';
 import { ChatOpenAI } from '@langchain/openai';
-import dotenv from 'dotenv';
 import Groq from 'groq-sdk';
 import { RedisService } from './services/redis';
-
-dotenv.config();
 
 export const redisService = new RedisService();
 
