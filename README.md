@@ -16,7 +16,7 @@ Okos is a Telegram AI Assistant built with TypeScript, LangGraph, and multiple A
 
 ## Prerequisites
 
-- Node.js 20+ (for development only)
+- Bun 1.2 (for development only)
 - Docker and Docker Compose (for containerized deployment)
 - Telegram Bot Token from [BotFather](https://t.me/botfather)
 - API keys for chosen AI providers
@@ -37,7 +37,7 @@ Platforms: `amd64` and `arm64`
 2. Install dependencies:
 
 ```bash
-yarn install
+bun install
 ```
 
 3. Copy the example environment file:
@@ -63,14 +63,14 @@ cp .env.docker.example .env.docker
 Development mode with hot reload:
 
 ```bash
-yarn dev
+bun dev
 ```
 
 Production mode:
 
 ```bash
-yarn build
-yarn start
+bun run build
+bun start
 ```
 
 ## Docker Deployment
@@ -88,11 +88,11 @@ For local LLM inference:
    ```
    Run build:
    ```bash
-   yarn build:ollama
+   bun build:ollama
    ```
 2. **Start Services**:
    ```bash
-   yarn up:ollama
+   bun up:ollama
    ```
 
 ### 2. Cloud Deployment
@@ -106,11 +106,11 @@ For cloud-based AI providers (OpenAI, Google, Groq):
    ```
    Run build:
    ```bash
-   yarn build:cloud
+   bun build:cloud
    ```
 2. **Start Services**:
    ```bash
-   yarn up:cloud
+   bun up:cloud
    ```
 
 ## Environment Variables
