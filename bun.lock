@@ -18,9 +18,8 @@
         "node-telegram-bot-api": "^0.64.0",
       },
       "devDependencies": {
-        "@types/bun": "^1.2.0",
-        "@types/node": "^22.10.2",
         "@types/node-telegram-bot-api": "^0.64.1",
+        "bun-types": "^1.2.0",
       },
     },
   },
@@ -106,8 +105,6 @@
     "@playwright/test": ["@playwright/test@1.50.0", "", { "dependencies": { "playwright": "1.50.0" }, "bin": { "playwright": "cli.js" } }, "sha512-ZGNXbt+d65EGjBORQHuYKj+XhCewlwpnSd/EDuLPZGSiEWmgOJB5RmMCCYGy5aMfTs9wx61RivfDKi8H/hcMvw=="],
 
     "@tokenizer/token": ["@tokenizer/token@0.3.0", "", {}, "sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A=="],
-
-    "@types/bun": ["@types/bun@1.2.0", "", { "dependencies": { "bun-types": "1.2.0" } }, "sha512-5N1JqdahfpBlAv4wy6svEYcd/YfO2GNrbL95JOmFx8nkE6dbK4R0oSE5SpBA4vBRqgrOUAXF8Dpiz+gi7r80SA=="],
 
     "@types/caseless": ["@types/caseless@0.12.5", "", {}, "sha512-hWtVTC2q7hc7xZ/RLbxapMvDMgUnDvKvMOpKal4DrMyfGBUfB1oKaZlIRr6mJL+If3bAP6sV/QneGzF6tJjZDg=="],
 
