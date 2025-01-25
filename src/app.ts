@@ -1,3 +1,4 @@
+import { Elysia } from 'elysia';
 import TelegramBot from 'node-telegram-bot-api';
 import { handleMessage, handlePhoto } from './handlers';
 import TelegramService from './services/telegram';
@@ -7,33 +8,22 @@ const port = process.env.PORT || 11435;
 // Initialize bot using singleton
 const bot = TelegramService.getInstance();
 
-const server = Bun.serve({
-  port,
-  async fetch(req) {
-    const { pathname, searchParams } = new URL(req.url);
+new Elysia()
+  .get('/', async () => {
+    const isPolling = await bot.isPolling();
+    const botUser = await bot.getMe();
 
-    if (req.method === 'GET' && pathname === '/') {
-      const isPolling = await bot.isPolling();
-      const botUser = await bot.getMe();
-      return new Response(
-        `<a href="https://t.me/${botUser.username}">${botUser.username}</a> is online!<br />Mode: ${
-          isPolling ? 'Polling' : 'Webhook'
-        }`,
-        { headers: { 'Content-Type': 'text/html' } }
-      );
-    }
-
-    if (process.env.TELEGRAM_WEBHOOK_URL && req.method === 'POST' && pathname === '/webhook') {
-      const body = await req.json();
-      bot.processUpdate(body);
-      return new Response(null, { status: 200 });
-    }
-
-    return new Response('Not Found', { status: 404 });
-  },
-});
-
-console.log(`Server listening on port ${server.port}`);
+    return `<a href="https://t.me/${botUser.username}">${botUser.username}</a> is online!<br />Mode: ${
+      isPolling ? 'Polling' : 'Webhook'
+    }`;
+  })
+  .post('/webhook', ({ body }: { body: any }) => {
+    bot.processUpdate(body);
+    return 'ok';
+  })
+  .listen(port, () => {
+    console.log(`🦊 Elysia app listening on port ${port}`);
+  });
 
 bot.on('text', async (msg) => {
   const chatId = msg.chat.id;
@@ -109,5 +99,3 @@ bot.on('webhook_error', (error) => {
 bot.on('error', (error) => {
   console.error('General error:', error);
 });
-
-console.log('Telegram bot is running...');

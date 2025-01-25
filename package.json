@@ -6,11 +6,11 @@
     "name": "Johnny Bui",
     "url": "https://github.com/johnnybui"
   },
-  "main": "dist/index.js",
+  "main": "dist/app.js",
   "scripts": {
-    "build": "bun build ./src/index.ts --outdir=dist --target bun --packages external",
-    "dev": "bun --watch src/index.ts",
-    "start": "bun dist/index.js",
+    "build": "bun build ./src/app.ts --outdir=dist --target bun --packages external",
+    "dev": "bun --watch src/app.ts",
+    "start": "bun dist/app.js",
     "build:ollama": "docker compose -f ./docker-compose-ollama.yml build",
     "build:cloud": "docker compose -f ./docker-compose-cloud.yml build",
     "up:ollama": "docker compose -f ./docker-compose-ollama.yml up -d",
@@ -28,6 +28,7 @@
     "@langchain/openai": "^0.3.14",
     "axios": "^1.7.9",
     "duck-duck-scrape": "^2.2.6",
+    "elysia": "^1.2.10",
     "groq-sdk": "^0.9.1",
     "ioredis": "^5.3.2",
     "node-telegram-bot-api": "^0.64.0"
