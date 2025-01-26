@@ -17,7 +17,7 @@ new Elysia()
       isPolling ? 'Polling' : 'Webhook'
     }`;
   })
-  .post('/webhook', ({ body }: { body: any }) => {
+  .post('/webhook', ({ body }: { body: TelegramBot.Update }) => {
     bot.processUpdate(body);
     return 'ok';
   })
