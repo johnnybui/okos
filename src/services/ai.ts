@@ -1,5 +1,4 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
-import axios from 'axios';
 import { MODEL_PROVIDER, MODEL_VISION_PROVIDER, nativeGroqClient, visionModel } from '../config';
 import { PROMPTS } from '../prompts';
 
@@ -70,9 +69,9 @@ Tell user that we are only analyzing the first image`,
     if (provider === 'google') {
       // For google, fetch the image and convert it to Base64
       const imagesBuffers = await Promise.all(
-        imageUrls.map((imageUrl) => axios.get(imageUrl, { responseType: 'arraybuffer' }))
+        imageUrls.map((imageUrl) => fetch(imageUrl).then((res) => res.arrayBuffer()))
       );
-      const imagesData = imagesBuffers.map((buffer) => Buffer.from(buffer.data).toString('base64'));
+      const imagesData = imagesBuffers.map((buffer) => Buffer.from(buffer).toString('base64'));
 
       const systemMessage = new SystemMessage(PROMPTS.VISION.SYSTEM);
       const humanMessage = new HumanMessage({
