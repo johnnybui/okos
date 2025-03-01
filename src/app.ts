@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia';
 import TelegramBot from 'node-telegram-bot-api';
 import { handleClearHistory, handleMessage, handlePhoto } from './handlers';
+import QueueService, { MessagePayload } from './services/queue';
 import TelegramService from './services/telegram';
 
 const port = process.env.PORT || 11435;
@@ -8,14 +9,43 @@ const port = process.env.PORT || 11435;
 // Initialize bot using singleton
 const bot = TelegramService.getInstance();
 
+// Start the bot (this will initialize polling or webhook only once)
+TelegramService.startBot();
+
+// Initialize queue service
+const queueService = QueueService.getInstance();
+
+// Set up the worker to process messages
+queueService.setupWorker(async (payload: MessagePayload) => {
+  const { chatId, type, content } = payload;
+  
+  try {
+    if (type === 'text') {
+      await handleMessage(chatId, content as string);
+    } else if (type === 'photo') {
+      const photoContent = content as { photos: any[], caption?: string };
+      await handlePhoto(chatId, photoContent.photos, photoContent.caption);
+    } else if (type === 'sticker') {
+      await handleMessage(chatId, content as string);
+    }
+  } catch (error) {
+    console.error(`Error processing ${type} message:`, error);
+  }
+});
+
 new Elysia()
   .get('/', async () => {
-    const isPolling = await bot.isPolling();
-    const botUser = await bot.getMe();
+    try {
+      const isPolling = await bot.isPolling();
+      const botUser = await bot.getMe();
 
-    return `<a href="https://t.me/${botUser.username}">${botUser.username}</a> is online!<br />Mode: ${
-      isPolling ? 'Polling' : 'Webhook'
-    }`;
+      return `<a href="https://t.me/${botUser.username}">${botUser.username}</a> is online!<br />Mode: ${
+        isPolling ? 'Polling' : 'Webhook'
+      }`;
+    } catch (error) {
+      console.error('Error in root route:', error);
+      return 'Bot is starting up. Please try again in a moment.';
+    }
   })
   .post('/webhook', ({ body }: { body: TelegramBot.Update }) => {
     bot.processUpdate(body);
@@ -44,7 +74,12 @@ bot.on('text', async (msg) => {
     return;
   }
 
-  handleMessage(chatId, text);
+  // Add message to queue instead of processing immediately
+  await queueService.addMessage({
+    chatId,
+    type: 'text',
+    content: text
+  });
 });
 
 // Store photos by media group ID
@@ -61,8 +96,15 @@ bot.on('photo', async (msg) => {
   const photo = photos[2] || photos[1] || photos[0]; // Get the photo with from medium resolution (index 2)
 
   if (!mediaGroupId) {
-    // Single photo - process immediately
-    handlePhoto(chatId, [photo], caption);
+    // Single photo - add to queue
+    await queueService.addMessage({
+      chatId,
+      type: 'photo',
+      content: {
+        photos: [photo],
+        caption
+      }
+    });
     return;
   }
 
@@ -75,10 +117,18 @@ bot.on('photo', async (msg) => {
   group.photos.push(photo);
 
   // Process after a short delay to ensure we have all photos
-  setTimeout(() => {
+  setTimeout(async () => {
     const group = mediaGroups.get(mediaGroupId);
     if (group) {
-      handlePhoto(chatId, group.photos, group.caption);
+      // Add to queue instead of processing immediately
+      await queueService.addMessage({
+        chatId,
+        type: 'photo',
+        content: {
+          photos: group.photos,
+          caption: group.caption
+        }
+      });
       mediaGroups.delete(mediaGroupId);
     }
   }, 1000); // Wait 1 second to collect all photos
@@ -90,7 +140,11 @@ bot.on('sticker', async (msg) => {
   const emoji = sticker?.emoji;
 
   if (emoji) {
-    return handleMessage(chatId, emoji);
+    return queueService.addMessage({
+      chatId,
+      type: 'sticker',
+      content: emoji
+    });
   }
 
   if (sticker?.file_id) {
@@ -109,4 +163,17 @@ bot.on('webhook_error', (error) => {
 
 bot.on('error', (error) => {
   console.error('General error:', error);
+});
+
+// Handle process termination
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM received, closing queue...');
+  await queueService.close();
+  process.exit(0);
+});
+
+process.on('SIGINT', async () => {
+  console.log('SIGINT received, closing queue...');
+  await queueService.close();
+  process.exit(0);
 });

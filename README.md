@@ -13,7 +13,8 @@ Okos is a Telegram AI Assistant built with TypeScript, LangGraph, and multiple A
 - Multiple Images input support
 - Internet searching
 - Weather information retrieval (current conditions and 5-day forecasts)
-- Redis for state persistence
+- Message queuing system with BullMQ to prevent overlapping workflows
+- Redis for state persistence and job queuing
 - Docker support for both local and cloud deployments
 
 ## Prerequisites
@@ -157,6 +158,17 @@ For cloud-based AI providers (OpenAI, Google, Groq):
 - `LANGCHAIN_ENDPOINT`: LangSmith endpoint
 - `LANGCHAIN_API_KEY`: LangSmith API key
 - `LANGCHAIN_PROJECT`: LangSmith project name
+
+## Message Queue System
+
+Okos uses BullMQ to implement a robust message processing system that ensures:
+
+- Messages from the same user are processed sequentially
+- Multiple users can be served concurrently
+- The system can handle high loads without crashing
+- Failed jobs are properly retried and logged
+
+Detailed documentation about the queue system is available in the [Queue System Documentation](./docs/queue-system.md).
 
 ## Model Configuration
 

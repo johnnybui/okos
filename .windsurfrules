@@ -1,0 +1,2 @@
+- Use Bun as package manager and runtime environment
+- Using LangGraph for AI agents and workflows. When create new agents (graphs), or graph nodes, follow "src/agents/main" as a reference for the patterns.

@@ -5,6 +5,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import Groq from 'groq-sdk';
 import { RedisService } from './services/redis';
 
+export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 export const redisService = new RedisService();
 
 if (!process.env.TELEGRAM_BOT_TOKEN) {
@@ -13,7 +14,6 @@ if (!process.env.TELEGRAM_BOT_TOKEN) {
 
 export const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 export const OLLAMA_API_URL = process.env.OLLAMA_API_URL || 'http://localhost:11434';
-export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
 type ModelProvider = 'ollama' | 'google' | 'groq' | 'openai';
 export const MODEL_PROVIDER = (process.env.MODEL_PROVIDER || 'ollama') as ModelProvider;
@@ -156,6 +156,15 @@ export const CHAT_CONFIG = {
   messageCooldownSeconds: 3,
   photoCooldownSeconds: 10,
   maxPhotosInMessage: 5,
+} as const;
+
+export const QUEUE_CONFIG = {
+  concurrency: 10, // Process up to 10 jobs concurrently (from different users)
+  maxJobsPerUser: 1, // Only 1 job at a time per user
+  jobsPer5Seconds: 1, // Rate limit per user
+  retryAttempts: 3, // Number of retry attempts for failed jobs
+  removeOnComplete: true, // Remove completed jobs
+  removeOnFail: 100, // Keep the last 100 failed jobs
 } as const;
 
 export const STICKER = {

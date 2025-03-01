@@ -11,14 +11,28 @@ export interface ChatState {
 
 export class RedisService {
   private client: Redis;
+  private static redisConnection: Redis;
+  private static bullMQRedisConnection: Redis;
   private readonly prefix = 'chat:';
   private readonly summaryPrefix = 'summary:';
   private readonly messagesPrefix = 'messages:';
   private readonly memoryPrefix = 'memory:';
-  private readonly rateLimitPrefix = 'ratelimit:';
 
   constructor() {
-    this.client = new Redis(process.env.REDIS_URL || REDIS_URL);
+    if (!RedisService.redisConnection) {
+      RedisService.redisConnection = new Redis(REDIS_URL);
+    }
+    this.client = RedisService.redisConnection;
+  }
+
+  /**
+   * Get the Redis connection for use with BullMQ
+   */
+  public static getBullMQConnection(): Redis {
+    if (!RedisService.bullMQRedisConnection) {
+      RedisService.bullMQRedisConnection = new Redis(REDIS_URL, { maxRetriesPerRequest: null });
+    }
+    return RedisService.bullMQRedisConnection;
   }
 
   private getKey(chatId: number): string {
@@ -43,22 +57,6 @@ export class RedisService {
 
   private getMemoryCountdownKey(chatId: number): string {
     return `${this.memoryPrefix}countdown:${chatId}`;
-  }
-
-  private getRateLimitKey(chatId: number, type: string): string {
-    return `${this.rateLimitPrefix}${type}:${chatId}`;
-  }
-
-  async isRateLimited(chatId: number, type: string, cooldownSeconds: number): Promise<boolean> {
-    try {
-      const key = this.getRateLimitKey(chatId, type);
-      // Use SET NX to atomically check and set the rate limit
-      const result = await this.client.set(key, '1', 'EX', cooldownSeconds, 'NX');
-      return result === null; // true if rate limited (key exists), false if not rate limited (key was set)
-    } catch (error) {
-      console.error('Error checking rate limit:', error);
-      return false;
-    }
   }
 
   /**

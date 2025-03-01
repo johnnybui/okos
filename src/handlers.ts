@@ -12,13 +12,6 @@ const redisService = new RedisService();
 
 export async function handleMessage(chatId: number, text: string) {
   try {
-    const isLimited = await redisService.isRateLimited(chatId, 'message', CHAT_CONFIG.messageCooldownSeconds);
-
-    if (isLimited) {
-      await TelegramService.sendSticker(chatId, pickRandomElement(STICKER.WRITING));
-      return;
-    }
-
     // Save the human message to Redis
     await redisService.saveHumanMessage(chatId, text);
 
@@ -94,13 +87,6 @@ export async function handleClearHistory(chatId: number) {
 
 export async function handlePhoto(chatId: number, photos: TelegramBot.PhotoSize[], caption?: string) {
   try {
-    const isLimited = await redisService.isRateLimited(chatId, 'photo', CHAT_CONFIG.photoCooldownSeconds);
-
-    if (isLimited) {
-      await TelegramService.sendSticker(chatId, pickRandomElement(STICKER.CALM_DOWN));
-      return;
-    }
-
     const fileLinks = await Promise.all(
       photos
         .slice(0, CHAT_CONFIG.maxPhotosInMessage) // Pick first photos due to limit of maxPhotosInMessage
