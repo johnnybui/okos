@@ -22,9 +22,8 @@ export async function handleMessage(chatId: number, text: string) {
     // Save the human message to Redis
     await redisService.saveHumanMessage(chatId, text);
 
-    // Decrement the summary and memory countdowns
+    // Decrement the summary countdowns
     await redisService.decrementSummaryCountdown(chatId);
-    await redisService.decrementMemoryCountdown(chatId);
 
     // Get the chat state with all messages
     let state = await redisService.getState(chatId);
@@ -37,7 +36,6 @@ export async function handleMessage(chatId: number, text: string) {
 
       // Initialize countdown values for a new chat
       await redisService.setSummaryCountdown(chatId, CHAT_CONFIG.summarizeEveryNPairOfMessages);
-      await redisService.setMemoryCountdown(chatId, CHAT_CONFIG.memorizeEveryNPairOfMessages);
     }
 
     const trimmedMessages = await trimMessages(state.messages, {

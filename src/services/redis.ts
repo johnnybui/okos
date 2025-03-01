@@ -266,55 +266,6 @@ export class RedisService {
   }
 
   /**
-   * Get the current memory countdown value
-   */
-  async getMemoryCountdown(chatId: number): Promise<number> {
-    try {
-      const value = await this.client.get(this.getMemoryCountdownKey(chatId));
-      return value ? parseInt(value, 10) : 0;
-    } catch (error) {
-      console.error('Error getting memory countdown:', error);
-      return 0;
-    }
-  }
-
-  /**
-   * Set the memory countdown value
-   */
-  async setMemoryCountdown(chatId: number, value: number): Promise<void> {
-    try {
-      await this.client.set(this.getMemoryCountdownKey(chatId), value.toString());
-    } catch (error) {
-      console.error('Error setting memory countdown:', error);
-    }
-  }
-
-  /**
-   * Decrement the memory countdown and return the new value
-   */
-  async decrementMemoryCountdown(chatId: number): Promise<number> {
-    try {
-      const key = this.getMemoryCountdownKey(chatId);
-      const value = await this.client.get(key);
-      const currentCount = value ? parseInt(value, 10) : 0;
-
-      if (currentCount <= 0) {
-        // Reset to configured value when it reaches 0
-        await this.client.set(key, CHAT_CONFIG.memorizeEveryNPairOfMessages.toString());
-        return 0;
-      } else {
-        // Decrement by 1
-        const newValue = currentCount - 1;
-        await this.client.set(key, newValue.toString());
-        return newValue;
-      }
-    } catch (error) {
-      console.error('Error decrementing memory countdown:', error);
-      return 0;
-    }
-  }
-
-  /**
    * Clear all data for a chat (messages, summary, and memory)
    */
   async clearAll(chatId: number): Promise<void> {

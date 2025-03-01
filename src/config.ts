@@ -152,8 +152,7 @@ export const nativeGroqClient = new Groq({
 export const CHAT_CONFIG = {
   minMessagesBeforeSummary: 6, // Number of messages before triggering summary
   messagesToKeep: 20, // Number of recent messages to keep in context
-  summarizeEveryNPairOfMessages: 3, // Run summarize agent every 5 messages
-  memorizeEveryNPairOfMessages: 3, // Run memorize agent every 5 messages
+  summarizeEveryNPairOfMessages: 3, // Run summarize & memorize agent every 5 messages
   messageCooldownSeconds: 3,
   photoCooldownSeconds: 10,
   maxPhotosInMessage: 5,

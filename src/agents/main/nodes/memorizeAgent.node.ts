@@ -18,7 +18,7 @@ export const memorizeAgentNode = async (
 
   // Check if it's time to run the memorization (countdown = 0)
   if (chatId) {
-    const countdown = await redisService.getMemoryCountdown(chatId);
+    const countdown = await redisService.getSummaryCountdown(chatId);
     if (countdown > 0) {
       // Not time to memorize yet
       return {};
