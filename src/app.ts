@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia';
 import TelegramBot from 'node-telegram-bot-api';
-import { handleMessage, handlePhoto } from './handlers';
+import { handleClearHistory, handleMessage, handlePhoto } from './handlers';
 import TelegramService from './services/telegram';
 
 const port = process.env.PORT || 11435;
@@ -25,11 +25,22 @@ new Elysia()
     console.log(`🦊 Elysia app listening on port ${port}`);
   });
 
+// Set up command handlers
+bot.setMyCommands([
+  { command: 'clear', description: 'Clear your chat history' },
+]);
+
 bot.on('text', async (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text;
 
   if (!text) {
+    return;
+  }
+
+  // Check for commands
+  if (text === '/clear') {
+    handleClearHistory(chatId);
     return;
   }
 

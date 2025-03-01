@@ -18,9 +18,9 @@ export const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 type ModelProvider = 'ollama' | 'google' | 'groq' | 'openai';
 export const MODEL_PROVIDER = (process.env.MODEL_PROVIDER || 'ollama') as ModelProvider;
 export const MODEL_VISION_PROVIDER = (process.env.MODEL_VISION_PROVIDER || MODEL_PROVIDER) as ModelProvider;
-export const MODEL_TOOL_PROVIDER = (process.env.MODEL_TOOL_PROVIDER || MODEL_PROVIDER) as ModelProvider;
+export const MODEL_UTILITY_PROVIDER = (process.env.MODEL_UTILITY_PROVIDER || MODEL_PROVIDER) as ModelProvider;
 
-function createChatModel(type: 'chat' | 'tool' | 'vision') {
+function createChatModel(type: 'chat' | 'utility' | 'vision') {
   const temperature = type === 'chat' ? 0.7 : 0;
 
   switch (type) {
@@ -59,27 +59,27 @@ function createChatModel(type: 'chat' | 'tool' | 'vision') {
       }
     }
 
-    case 'tool': {
-      const provider = MODEL_TOOL_PROVIDER || MODEL_PROVIDER;
+    case 'utility': {
+      const provider = MODEL_UTILITY_PROVIDER || MODEL_PROVIDER;
       switch (provider) {
         case 'openai':
           return new ChatOpenAI({
             apiKey: process.env.OPENAI_API_KEY!,
-            modelName: process.env.OPENAI_TOOL_MODEL_NAME || 'gpt-4o-mini',
+            modelName: process.env.OPENAI_UTILITY_MODEL_NAME || 'gpt-4o-mini',
             temperature,
             maxRetries: 2,
           });
         case 'google':
           return new ChatGoogleGenerativeAI({
             apiKey: process.env.GOOGLE_API_KEY!,
-            modelName: process.env.GOOGLE_TOOL_MODEL_NAME || 'gemini-1.5-flash',
+            modelName: process.env.GOOGLE_UTILITY_MODEL_NAME || 'gemini-1.5-flash',
             temperature,
             maxRetries: 2,
           });
         case 'groq':
           return new ChatGroq({
             apiKey: process.env.GROQ_API_KEY!,
-            modelName: process.env.GROQ_TOOL_MODEL_NAME || 'llama-3.1-8b-instant',
+            modelName: process.env.GROQ_UTILITY_MODEL_NAME || 'llama-3.1-8b-instant',
             temperature,
             maxRetries: 2,
           });
@@ -87,7 +87,7 @@ function createChatModel(type: 'chat' | 'tool' | 'vision') {
         default:
           return new ChatOllama({
             baseUrl: OLLAMA_API_URL,
-            model: process.env.OLLAMA_TOOL_MODEL_NAME || 'qwen2.5:1b',
+            model: process.env.OLLAMA_UTILITY_MODEL_NAME || 'qwen2.5:1b',
             temperature,
             maxRetries: 2,
           });
@@ -140,8 +140,8 @@ function createChatModel(type: 'chat' | 'tool' | 'vision') {
 }
 
 export const chatModel = createChatModel('chat');
-export const classifierModel = createChatModel('tool');
-export const summarizeModel = createChatModel('tool');
+export const classifierModel = createChatModel('utility');
+export const summarizeModel = createChatModel('utility');
 export const visionModel = createChatModel('vision');
 
 export const nativeGroqClient = new Groq({
@@ -150,9 +150,10 @@ export const nativeGroqClient = new Groq({
 });
 
 export const CHAT_CONFIG = {
-  maxMessagesBeforeSummary: 6, // Number of messages before triggering summary
-  messagesToKeep: 6, // Number of recent messages to keep in context
-  messagesWithSummary: 2, // Number of recent messages to keep when summary is included
+  minMessagesBeforeSummary: 6, // Number of messages before triggering summary
+  messagesToKeep: 20, // Number of recent messages to keep in context
+  summarizeEveryNPairOfMessages: 3, // Run summarize agent every 5 messages
+  memorizeEveryNPairOfMessages: 3, // Run memorize agent every 5 messages
   messageCooldownSeconds: 3,
   photoCooldownSeconds: 10,
   maxPhotosInMessage: 5,
