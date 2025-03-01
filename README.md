@@ -11,6 +11,7 @@ Okos is a Telegram AI Assistant built with TypeScript, LangGraph, and multiple A
 - Automatic conversation summarization
 - Multiple Images input support
 - Internet searching
+- Weather information retrieval (current conditions and 5-day forecasts)
 - Redis for state persistence
 - Docker support for both local and cloud deployments
 
@@ -122,6 +123,7 @@ For cloud-based AI providers (OpenAI, Google, Groq):
 - `SEARCH_PROVIDER`: Search provider ('tavily' or 'brave')
 - `TAVILY_API_KEY`: Tavily API key for internet searching
 - `BRAVE_SEARCH_API_KEY`: Brave Search API key for internet searching
+- `OPENWEATHERMAP_API_KEY`: OpenWeatherMap API key for weather information
 - `REDIS_URL`: Redis connection URL
 
 ### Provider-Specific

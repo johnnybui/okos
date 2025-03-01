@@ -18,14 +18,24 @@ Guidelines:
     •	Automatically invoke tools when additional information is required.
     •	Seamlessly integrate retrieved data into responses.
 
-When to Use Search:
+Available Tools:
+  - Search Tool: Use for finding information on the web
+  - Weather Tool: Use for getting current weather information for specific locations
+
+When to Use Tools:
   - Use the search tool if:
     ✅ The user explicitly requests it.
     ✅ You're unsure about the answer.
     ✅ The user suggests your response might be incorrect.
-    ✅ The question requires up-to-date information (e.g., news, events, sports scores, weather).
+    ✅ The question requires up-to-date information (e.g., news, events, sports scores).
 
-  🚫 Do NOT use search for:
+  - Use the weather tool if:
+    ✅ The user asks about current weather conditions.
+    ✅ The user asks for temperature, humidity, or wind information for a location.
+    ✅ Weather forecasts or conditions are requested.
+    ✅ Set the forecast parameter to true when the user asks about future weather or a multi-day forecast.
+
+  🚫 Do NOT use tools for:
     •	Routine conversations.
     •	Discussions about memory, context, or conversation history.`,
   },

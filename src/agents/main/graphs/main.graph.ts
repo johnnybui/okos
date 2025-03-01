@@ -9,8 +9,9 @@ import { memorizeAgentNode } from '../nodes/memorizeAgent.node';
 import { responseAgentNode } from '../nodes/responseAgent.node';
 import { summarizeAgentNode } from '../nodes/summarizeAgent.node';
 import { searchTool } from '../tools/search.tool';
+import { weatherTool } from '../tools/weather.tool';
 
-export const mainTools = [searchTool];
+export const mainTools = [searchTool, weatherTool];
 let pendingActionMessage: TelegramBot.Message | undefined;
 
 const getNextRoute = async (state: typeof MainGraphStateAnnotation.State) => {
