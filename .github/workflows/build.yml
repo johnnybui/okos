@@ -2,11 +2,11 @@ name: Build
 
 on:
   push:
-    branches: [master]
+    branches: [main]
 
 env:
   CI: true
-  DOCKER_IMAGE: ghcr.io/johnnybui/okos
+  DOCKER_IMAGE: ghcr.io/johnnybui/okos:latest,ghcr.io/johnnybui/okos:2,ghcr.io/johnnybui/okos:2.1.0
 
 jobs:
   build:
@@ -37,7 +37,7 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ env.DOCKER_IMAGE }}:latest
+          tags: ${{ env.DOCKER_IMAGE }}
 
   deploy:
     runs-on: ubuntu-latest

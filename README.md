@@ -2,11 +2,12 @@
 
 [![Build](https://github.com/johnnybui/okos/actions/workflows/build.yml/badge.svg)](https://github.com/johnnybui/okos/actions/workflows/build.yml)
 
-Okos is a Telegram AI Assistant built with TypeScript, LangGraph, and multiple AI model providers. It maintains conversation context and provides summaries of interactions.
+Okos is a Telegram AI Assistant built with TypeScript, LangGraph, and multiple AI model providers. It maintains conversation context and provides summaries of interactions. Version 2 (current) uses native tool capabilities of modern LLMs for enhanced performance.
 
 ## Features
 
 - Multiple AI model support (OpenAI, Google Gemini, Groq, Ollama)
+- Native tool use for enhanced performance and reliability
 - Conversation context management
 - Automatic conversation summarization
 - Multiple Images input support
@@ -23,6 +24,7 @@ Okos is a Telegram AI Assistant built with TypeScript, LangGraph, and multiple A
 - API keys for chosen AI providers
 - Redis server
 - Ollama with Llama model installed (for Ollama model provider)
+- **Important:** For chat models, you must use models with native tool-calling capabilities (e.g., GPT-4o, Gemini-2.0-flash)
 
 ## Prebuilt Docker Image
 
@@ -130,16 +132,24 @@ For cloud-based AI providers (OpenAI, Google, Groq):
 
 - OpenAI:
   - `OPENAI_API_KEY`
-  - `OPENAI_MODEL_NAME` (default: gpt-4o-mini)
+  - `OPENAI_MODEL_NAME` (default: gpt-4o) - Must support native tool use
+  - `OPENAI_UTILITY_MODEL_NAME` (default: gpt-4o-mini) - For utility tasks
+  - `OPENAI_VISION_MODEL_NAME` (default: gpt-4o) - For vision tasks
 - Google:
   - `GOOGLE_API_KEY`
-  - `GOOGLE_MODEL_NAME` (default: gemini-1.5-flash)
+  - `GOOGLE_MODEL_NAME` (default: gemini-2.0-flash) - Must support native tool use
+  - `GOOGLE_UTILITY_MODEL_NAME` (default: gemini-1.5-flash-8b) - For utility tasks
+  - `GOOGLE_VISION_MODEL_NAME` (default: gemini-2.0-flash) - For vision tasks
 - Groq:
   - `GROQ_API_KEY`
-  - `GROQ_MODEL_NAME` (default: llama-3.3-70b-versatile)
+  - `GROQ_MODEL_NAME` (default: llama-3.3-70b-versatile) - Must support native tool use
+  - `GROQ_UTILITY_MODEL_NAME` (default: llama-3.1-8b-instant) - For utility tasks
+  - `GROQ_VISION_MODEL_NAME` (default: llama-3.2-90b-vision-preview) - For vision tasks
 - Ollama:
   - `OLLAMA_API_URL`
-  - `OLLAMA_MODEL_NAME` (default: llama3.2)
+  - `OLLAMA_MODEL_NAME` (default: llama3.2) - Must support native tool use
+  - `OLLAMA_UTILITY_MODEL_NAME` (default: qwen2.5:1b) - For utility tasks
+  - `OLLAMA_VISION_MODEL_NAME` (default: llama-3.2-vision) - For vision tasks
 
 ### Optional
 
@@ -147,6 +157,31 @@ For cloud-based AI providers (OpenAI, Google, Groq):
 - `LANGCHAIN_ENDPOINT`: LangSmith endpoint
 - `LANGCHAIN_API_KEY`: LangSmith API key
 - `LANGCHAIN_PROJECT`: LangSmith project name
+
+## Model Configuration
+
+Okos uses three different model configurations for specialized tasks:
+
+1. **Chat Model** - The primary model for user interactions
+
+   - **Must support native tool use** (e.g., GPT-4o, Gemini-1.5-flash)
+   - Handles the main conversation flow and tool invocation
+
+2. **Utility Model** - For internal utility tasks
+
+   - Used for summarization, memory management, etc.
+   - Can be smaller/cheaper models as they don't require tool use
+
+3. **Vision Model** - For processing image inputs
+   - Used when users send photos
+   - Should have vision capabilities
+
+## Archive Version
+
+An older version of Okos (v1) is available that supports all LLM models for chat functionality, as it used a classifier-based approach instead of native tool use. This version is no longer maintained but may be useful for those using models without native tool capabilities.
+
+- Archive repository: [https://github.com/johnnybui/okos/tree/okos-v1](https://github.com/johnnybui/okos/tree/okos-v1)
+- Note: The v1 version has fewer features compared to the current version.
 
 ## License
 
