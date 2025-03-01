@@ -1,0 +1,40 @@
+name: Build
+
+on:
+  push:
+    branches: [okos-v1]
+
+env:
+  CI: true
+  DOCKER_IMAGE: ghcr.io/johnnybui/okos:1.20.2,ghcr.io/johnnybui/okos:1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        run: cp .env.docker.example .env.docker
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.PAT }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ env.DOCKER_IMAGE }}
