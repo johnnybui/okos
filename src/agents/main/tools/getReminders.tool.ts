@@ -33,7 +33,7 @@ export const getRemindersTools = tool(
           timeZoneName: 'shortOffset',
         });
 
-        return `${index + 1}. Time: ${formattedTime}\n   Message: "${reminder.message}"`;
+        return `${index + 1}. ID: ${reminder.id}\n   Message: "${reminder.message}"\n   Time: ${formattedTime}`;
       });
 
       return `You have ${reminders.length} pending reminder${
