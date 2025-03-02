@@ -10,16 +10,19 @@ export const getRemindersTools = tool(
     try {
       // Get the reminder queue service instance
       const reminderQueueService = ReminderQueueService.getInstance();
-      
+
       // Get pending reminders for the user
       const reminders = await reminderQueueService.getPendingReminders(chatId);
-      
+
       if (reminders.length === 0) {
         return "You don't have any pending reminders.";
       }
-      
+
+      // Sort reminders by timestamp
+      const sortedReminders = reminders.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+
       // Format the reminders for display
-      const formattedReminders = reminders.map((reminder, index) => {
+      const formattedReminders = sortedReminders.map((reminder, index) => {
         const formattedTime = reminder.timestamp.toLocaleString('en-US', {
           weekday: 'short',
           month: 'short',
@@ -27,12 +30,15 @@ export const getRemindersTools = tool(
           year: 'numeric',
           hour: '2-digit',
           minute: '2-digit',
+          timeZoneName: 'shortOffset',
         });
-        
-        return `${index + 1}. ID: ${reminder.id}\n   Message: "${reminder.message}"\n   Time: ${formattedTime}`;
+
+        return `${index + 1}. Time: ${formattedTime}\n   Message: "${reminder.message}"`;
       });
-      
-      return `You have ${reminders.length} pending reminder${reminders.length > 1 ? 's' : ''}:\n\n${formattedReminders.join('\n\n')}`;
+
+      return `You have ${reminders.length} pending reminder${
+        reminders.length > 1 ? 's' : ''
+      }:\n\n${formattedReminders.join('\n\n')}`;
     } catch (error) {
       if (error instanceof Error) {
         return `Error getting reminders: ${error.message}`;

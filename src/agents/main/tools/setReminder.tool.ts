@@ -15,22 +15,20 @@ export const setReminderTool = tool(
       // Handle absolute time if provided
       if (targetTime) {
         const targetDate = new Date(targetTime);
-        
+
         // Validate the target date
         if (isNaN(targetDate.getTime())) {
           return 'Error: Invalid target time format. Please provide a valid date and time.';
         }
-        
+
         // Calculate delay from now until target time
         totalDelayMs = targetDate.getTime() - Date.now();
         reminderTime = targetDate;
       } else {
         // Calculate total delay in milliseconds from relative time parameters
         totalDelayMs =
-          (delayMinutes || 0) * 60 * 1000 + 
-          (delayHours || 0) * 60 * 60 * 1000 + 
-          (delayDays || 0) * 24 * 60 * 60 * 1000;
-          
+          (delayMinutes || 0) * 60 * 1000 + (delayHours || 0) * 60 * 60 * 1000 + (delayDays || 0) * 24 * 60 * 60 * 1000;
+
         // Calculate the reminder time for the response
         reminderTime = new Date(Date.now() + totalDelayMs);
       }
@@ -58,6 +56,7 @@ export const setReminderTool = tool(
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
+        timeZoneName: 'shortOffset',
       });
 
       return `Reminder set successfully! I'll remind you about "${message}" on ${formattedTime}.`;
@@ -70,14 +69,31 @@ export const setReminderTool = tool(
   },
   {
     name: 'set_reminder',
-    description: 'Set a reminder to be sent to the user at a specified time. Supports both relative time (delay from now) and absolute time specifications.',
+    description:
+      'Set a reminder to be sent to the user at a specified time. Supports both relative time (delay from now) and absolute time specifications.',
     schema: z.object({
       chatId: z.number().describe('The chat ID of the chat where the user are chatting with the you.'),
-      message: z.string().describe('The message to send to the user when the reminder is triggered.'),
-      delayMinutes: z.number().optional().describe('The number of minutes to wait before sending the reminder. Use for relative time specifications.'),
-      delayHours: z.number().optional().describe('The number of hours to wait before sending the reminder. Use for relative time specifications.'),
-      delayDays: z.number().optional().describe('The number of days to wait before sending the reminder. Use for relative time specifications.'),
-      targetTime: z.string().optional().describe('The specific date and time to send the reminder (ISO string or any parsable date format). Use for absolute time specifications like "2023-04-15T14:30:00" or "April 15, 2023 14:30".'),
+      message: z
+        .string()
+        .describe('The reminder message to be sent to the user. Maintain the current conversation style.'),
+      delayMinutes: z
+        .number()
+        .optional()
+        .describe('The number of minutes to wait before sending the reminder. Use for relative time specifications.'),
+      delayHours: z
+        .number()
+        .optional()
+        .describe('The number of hours to wait before sending the reminder. Use for relative time specifications.'),
+      delayDays: z
+        .number()
+        .optional()
+        .describe('The number of days to wait before sending the reminder. Use for relative time specifications.'),
+      targetTime: z
+        .string()
+        .optional()
+        .describe(
+          'The specific date and time to send the reminder (ISO string or any parsable date format). Use for absolute time specifications like "2023-04-15T14:30:00" or "April 15, 2023 14:30".'
+        ),
     }),
   }
 );

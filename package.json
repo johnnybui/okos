@@ -1,6 +1,6 @@
 {
   "name": "okos-telegram",
-  "version": "2.3.4",
+  "version": "2.3.5",
   "description": "Okos - AI Assistant Telegram Bot using LangGraph and Ollama or Cloud LLM Providers",
   "author": {
     "name": "Johnny Bui",
