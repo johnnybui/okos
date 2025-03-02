@@ -1,7 +1,7 @@
 import { Elysia } from 'elysia';
 import TelegramBot from 'node-telegram-bot-api';
 import { handleClearHistory, handleMessage, handlePhoto } from './handlers';
-import QueueService, { MessagePayload } from './services/messageQueue';
+import MessageQueueService, { MessagePayload } from './services/messageQueue';
 import { ReminderQueueService } from './services/reminderQueue';
 import TelegramService from './services/telegram';
 
@@ -14,7 +14,7 @@ const bot = TelegramService.getInstance();
 TelegramService.startBot();
 
 // Initialize queue services
-const queueService = QueueService.getInstance();
+const queueService = MessageQueueService.getInstance();
 const reminderQueueService = ReminderQueueService.getInstance(); // Initialize reminder queue service
 
 // Register the function that will process messages from the queue

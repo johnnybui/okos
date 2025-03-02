@@ -8,11 +8,13 @@ import { pickRandomElement } from '../../../utils';
 import { memorizeAgentNode } from '../nodes/memorizeAgent.node';
 import { responseAgentNode } from '../nodes/responseAgent.node';
 import { summarizeAgentNode } from '../nodes/summarizeAgent.node';
-import { reminderTool } from '../tools/reminder.tool';
+import { deleteReminderTool } from '../tools/deleteReminder.tool';
+import { getRemindersTools } from '../tools/getReminders.tool';
 import { searchTool } from '../tools/search.tool';
+import { setReminderTool } from '../tools/setReminder.tool';
 import { weatherTool } from '../tools/weather.tool';
 
-export const mainTools = [searchTool, weatherTool, reminderTool];
+export const mainTools = [searchTool, weatherTool, setReminderTool, getRemindersTools, deleteReminderTool];
 let pendingActionMessage: TelegramBot.Message | undefined;
 
 const getNextRoute = async (state: typeof MainGraphStateAnnotation.State) => {
@@ -28,7 +30,11 @@ const getNextRoute = async (state: typeof MainGraphStateAnnotation.State) => {
     if (lastAIMessage.tool_calls[0].name.includes('weather')) {
       stateSticker = pickRandomElement(STICKER.SEARCHING);
     }
-    if (lastAIMessage.tool_calls[0].name.includes('reminder')) {
+    if (
+      lastAIMessage.tool_calls[0].name.includes('set_reminder') ||
+      lastAIMessage.tool_calls[0].name.includes('get_reminders') ||
+      lastAIMessage.tool_calls[0].name.includes('delete_reminder')
+    ) {
       stateSticker = pickRandomElement(STICKER.WRITING);
     }
 

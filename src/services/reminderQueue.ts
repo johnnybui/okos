@@ -108,6 +108,56 @@ export class ReminderQueueService {
   }
 
   /**
+   * Get all pending reminders for a specific chat ID
+   */
+  public async getPendingReminders(chatId: number): Promise<Array<{ id: string; message: string; timestamp: Date }>> {
+    try {
+      // Get all delayed jobs
+      const delayedJobs = await this.queue.getDelayed();
+      
+      // Filter jobs by chatId and map to a more user-friendly format
+      const reminders = delayedJobs
+        .filter(job => job.data.chatId === chatId)
+        .map(job => {
+          // Calculate when the job will run
+          const processTime = new Date(Date.now() + (job.opts.delay || 0));
+          
+          return {
+            id: job.id || '',
+            message: job.data.message,
+            timestamp: processTime
+          };
+        });
+
+      return reminders;
+    } catch (error) {
+      console.error(`Error getting pending reminders for chat ${chatId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete a specific reminder by its job ID
+   */
+  public async deleteReminder(jobId: string): Promise<boolean> {
+    try {
+      // Get the job
+      const job = await this.queue.getJob(jobId);
+      
+      if (!job) {
+        return false; // Job not found
+      }
+      
+      // Remove the job
+      await job.remove();
+      return true;
+    } catch (error) {
+      console.error(`Error deleting reminder job ${jobId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Close queue and worker connections
    */
   public async close(): Promise<void> {

@@ -5,7 +5,7 @@ import { ReminderQueueService } from '../../../services/reminderQueue';
 /**
  * Tool for setting reminders that will be sent to the user at a specified time
  */
-export const reminderTool = tool(
+export const setReminderTool = tool(
   async ({ chatId, message, delayMinutes, delayHours, delayDays }) => {
     try {
       // Calculate total delay in milliseconds

@@ -21,7 +21,9 @@ Guidelines:
 Available Tools:
   - Search Tool: Use for finding information on the web
   - Weather Tool: Use for getting current weather information for specific locations
-  - Reminder Tool: Use for setting reminders that will be sent to the user at a specified time. Report to the user when the reminder is triggered.
+  - Set Reminder Tool: Use for setting reminders that will be sent to the user at a specified time. Report to the user when the reminder is triggered.
+  - Get Reminders Tool: Use for listing all pending reminders for the user.
+  - Delete Reminder Tool: Use for deleting a specific reminder by its ID.
 
 When to Use Tools:
   - Use the search tool if:
@@ -36,11 +38,22 @@ When to Use Tools:
     ✅ Weather forecasts or conditions are requested.
     ✅ Set the forecast parameter to true when the user asks about future weather or a multi-day forecast.
 
-  - Use the reminder tool if:
+  - Use the set_reminder tool if:
     ✅ The user asks you to remind them about something later.
     ✅ The user wants to set a reminder for a specific time or after a delay.
     ✅ The user mentions needing to remember something in the future.
     ✅ Always include the chatId parameter from the state, a clear message, and appropriate delay parameters (delayMinutes, delayHours, or delayDays).
+    
+  - Use the get_reminders tool if:
+    ✅ The user asks about their current or pending reminders.
+    ✅ The user wants to know what reminders they have set.
+    ✅ The user asks if they have any reminders.
+    ✅ Always include the chatId parameter from the state.
+    
+  - Use the delete_reminder tool if:
+    ✅ The user wants to cancel or delete a specific reminder.
+    ✅ The user asks to remove a reminder by its ID.
+    ✅ Always include the chatId parameter from the state and the reminderId parameter.
 `,
   },
   SUMMARY: {

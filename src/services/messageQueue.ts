@@ -15,8 +15,8 @@ export type PhotoContent = {
 };
 
 // Singleton Queue Service
-export class QueueService {
-  private static instance: QueueService;
+export class MessageQueueService {
+  private static instance: MessageQueueService;
   private redisConnection: any;
   private queues: Map<number, Queue>;
   private workers: Map<number, Worker>;
@@ -31,11 +31,11 @@ export class QueueService {
     this.workers = new Map();
   }
 
-  public static getInstance(): QueueService {
-    if (!QueueService.instance) {
-      QueueService.instance = new QueueService();
+  public static getInstance(): MessageQueueService {
+    if (!MessageQueueService.instance) {
+      MessageQueueService.instance = new MessageQueueService();
     }
-    return QueueService.instance;
+    return MessageQueueService.instance;
   }
 
   /**
@@ -147,4 +147,4 @@ export class QueueService {
   }
 }
 
-export default QueueService;
+export default MessageQueueService;
