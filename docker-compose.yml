@@ -4,7 +4,6 @@ services:
     container_name: okos
     env_file: .env.docker
     environment:
-      - REDIS_URL=redis://redis:6379
       - PORT=11435
     ports:
       - '11435:11435'

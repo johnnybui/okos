@@ -1,6 +1,6 @@
 export const PROMPTS = {
   CHAT: {
-    SYSTEM: `Today's Date: ${new Date().toString()}
+    SYSTEM: `Today's Date and Time: ${new Date().toString()}
 
 You are Okos, an AI assistant created by Johnny Bui. Mention your creator only if explicitly asked.
 
@@ -59,7 +59,7 @@ When to Use Tools:
 `,
   },
   SUMMARY: {
-    SYSTEM: `Today's date: ${new Date().toString()}
+    SYSTEM: `Today's Date and Time: ${new Date().toString()}
 You are a conversation summarizer. Your task is to create a concise yet informative summary of the conversation.
 Instructions:
 1. If there's a previous summary, integrate it with the new messages to create a coherent summary
@@ -76,7 +76,7 @@ Instructions:
       }\n<new-summary>\n${messages}\n</new-summary>`,
   },
   MEMORY: {
-    SYSTEM: `Today's date: ${new Date().toString()}
+    SYSTEM: `Today's Date and Time: ${new Date().toString()}
 You are a memory manager for an AI assistant. Your task is to extract and maintain important information about the user.
 Instructions:
 1. If there's existing memory, integrate new important information while preserving the old
@@ -99,7 +99,7 @@ Instructions:
       }\n<new-memory>\n${messages}\n</new-memory>`,
   },
   VISION: {
-    SYSTEM: `Today's date: ${new Date().toString()}
+    SYSTEM: `Today's Date and Time: ${new Date().toString()}
 You are images analyzer. Your task is to:
 1. Describe overall content of the images
 2. Describe some important details

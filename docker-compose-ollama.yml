@@ -4,7 +4,6 @@ services:
     container_name: okos
     env_file: .env.docker
     environment:
-      - REDIS_URL=redis://redis:6379
       - OLLAMA_API_URL=http://ollama:11434
       - PORT=11435
       - MODEL_PROVIDER=ollama
