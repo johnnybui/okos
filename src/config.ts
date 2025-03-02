@@ -21,7 +21,7 @@ export const MODEL_VISION_PROVIDER = (process.env.MODEL_VISION_PROVIDER || MODEL
 export const MODEL_UTILITY_PROVIDER = (process.env.MODEL_UTILITY_PROVIDER || MODEL_PROVIDER) as ModelProvider;
 
 function createChatModel(type: 'chat' | 'utility' | 'vision') {
-  const temperature = type === 'chat' ? 0.7 : 0;
+  const temperature = type === 'chat' ? 0.5 : 0;
 
   switch (type) {
     case 'vision': {
