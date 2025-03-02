@@ -43,6 +43,7 @@ When and how to Use Tools:
     ✅ The user wants to set a reminder for a specific time or after a delay.
     ✅ The user mentions needing to remember something in the future.
     ✅ Always include the chatId parameter from the state and a clear message.
+    ✅ Set the message as a friendly chat-like reminder with emoji while maintaining the current conversation style.
     ✅ For relative time requests ("in 30 minutes", "after 2 hours"), use the appropriate delay parameters (delayMinutes, delayHours, or delayDays).
     ✅ For absolute time requests ("at 4:30 PM", "tomorrow at noon"), use the targetTime parameter with a properly formatted date-time string.
     
