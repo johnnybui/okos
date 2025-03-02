@@ -1,4 +1,4 @@
-import { Queue, Worker } from 'bullmq';
+import { Job, Queue, Worker } from 'bullmq';
 import { QUEUE_CONFIG } from '../config';
 import { RedisService } from './redis';
 import TelegramService from './telegram';
@@ -113,19 +113,20 @@ export class ReminderQueueService {
   public async getPendingReminders(chatId: number): Promise<Array<{ id: string; message: string; timestamp: Date }>> {
     try {
       // Get all delayed jobs
-      const delayedJobs = await this.queue.getDelayed();
-      
+      const delayedJobs: Job[] = await this.queue.getDelayed();
+
       // Filter jobs by chatId and map to a more user-friendly format
       const reminders = delayedJobs
-        .filter(job => job.data.chatId === chatId)
-        .map(job => {
-          // Calculate when the job will run
-          const processTime = new Date(Date.now() + (job.opts.delay || 0));
-          
+        .filter((job) => job.data.chatId === chatId)
+        .map((job) => {
+          // Get the actual scheduled processing time from the job
+          // BullMQ stores the processing time as a timestamp in milliseconds
+          const processTime = new Date(job.delay + job.timestamp);
+
           return {
             id: job.id || '',
             message: job.data.message,
-            timestamp: processTime
+            timestamp: processTime,
           };
         });
 
@@ -143,11 +144,11 @@ export class ReminderQueueService {
     try {
       // Get the job
       const job = await this.queue.getJob(jobId);
-      
+
       if (!job) {
         return false; // Job not found
       }
-      
+
       // Remove the job
       await job.remove();
       return true;

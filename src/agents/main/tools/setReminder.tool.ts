@@ -22,7 +22,7 @@ export const setReminderTool = tool(
         }
 
         // Calculate delay from now until target time
-        totalDelayMs = targetDate.getTime() - Date.now();
+        totalDelayMs = Number(targetDate) - Number(new Date());
         reminderTime = targetDate;
       } else {
         // Calculate total delay in milliseconds from relative time parameters
