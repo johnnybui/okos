@@ -15,15 +15,15 @@ TelegramService.startBot();
 // Initialize queue service
 const queueService = QueueService.getInstance();
 
-// Set up the worker to process messages
-queueService.setupWorker(async (payload: MessagePayload) => {
+// Register the function that will process messages from the queue
+queueService.registerMessageProcessor(async (payload: MessagePayload) => {
   const { chatId, type, content } = payload;
-  
+
   try {
     if (type === 'text') {
       await handleMessage(chatId, content as string);
     } else if (type === 'photo') {
-      const photoContent = content as { photos: any[], caption?: string };
+      const photoContent = content as { photos: any[]; caption?: string };
       await handlePhoto(chatId, photoContent.photos, photoContent.caption);
     } else if (type === 'sticker') {
       await handleMessage(chatId, content as string);
@@ -56,9 +56,7 @@ new Elysia()
   });
 
 // Set up command handlers
-bot.setMyCommands([
-  { command: 'clear', description: 'Clear your chat history' },
-]);
+bot.setMyCommands([{ command: 'clear', description: 'Clear your chat history' }]);
 
 bot.on('text', async (msg) => {
   const chatId = msg.chat.id;
@@ -78,7 +76,7 @@ bot.on('text', async (msg) => {
   await queueService.addMessage({
     chatId,
     type: 'text',
-    content: text
+    content: text,
   });
 });
 
@@ -102,8 +100,8 @@ bot.on('photo', async (msg) => {
       type: 'photo',
       content: {
         photos: [photo],
-        caption
-      }
+        caption,
+      },
     });
     return;
   }
@@ -126,8 +124,8 @@ bot.on('photo', async (msg) => {
         type: 'photo',
         content: {
           photos: group.photos,
-          caption: group.caption
-        }
+          caption: group.caption,
+        },
       });
       mediaGroups.delete(mediaGroupId);
     }
@@ -143,7 +141,7 @@ bot.on('sticker', async (msg) => {
     return queueService.addMessage({
       chatId,
       type: 'sticker',
-      content: emoji
+      content: emoji,
     });
   }
 

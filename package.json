@@ -1,6 +1,6 @@
 {
   "name": "okos-telegram",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Okos - AI Assistant Telegram Bot using LangGraph and Ollama or Cloud LLM Providers",
   "author": {
     "name": "Johnny Bui",
@@ -26,7 +26,7 @@
     "@langchain/langgraph": "^0.2.33",
     "@langchain/ollama": "^0.1.3",
     "@langchain/openai": "^0.3.14",
-    "bullmq": "^2.4.0",
+    "bullmq": "^5.41.7",
     "duck-duck-scrape": "^2.2.6",
     "elysia": "^1.2.10",
     "groq-sdk": "^0.9.1",

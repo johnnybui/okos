@@ -159,7 +159,6 @@ export const CHAT_CONFIG = {
 } as const;
 
 export const QUEUE_CONFIG = {
-  concurrency: 10, // Process up to 10 jobs concurrently (from different users)
   maxJobsPerUser: 1, // Only 1 job at a time per user
   jobsPer5Seconds: 1, // Rate limit per user
   retryAttempts: 3, // Number of retry attempts for failed jobs

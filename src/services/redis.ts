@@ -35,7 +35,7 @@ export class RedisService {
     return RedisService.bullMQRedisConnection;
   }
 
-  private getKey(chatId: number): string {
+  private getChatKey(chatId: number): string {
     return `${this.prefix}${chatId}`;
   }
 
