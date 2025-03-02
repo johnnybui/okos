@@ -75,7 +75,7 @@ export const setReminderTool = tool(
       chatId: z.number().describe('The chat ID of the chat where the user are chatting with the you.'),
       message: z
         .string()
-        .describe('The reminder message to be sent to the user. Maintain the current conversation style. Do not just repeat what user said but make it like a friendly chat message.'),
+        .describe('The friendly, chat-like reminder message to the user. Maintain the current conversation style and use suitable emoji.'),
       delayMinutes: z
         .number()
         .optional()
