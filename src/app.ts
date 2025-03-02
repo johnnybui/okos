@@ -1,7 +1,8 @@
 import { Elysia } from 'elysia';
 import TelegramBot from 'node-telegram-bot-api';
 import { handleClearHistory, handleMessage, handlePhoto } from './handlers';
-import QueueService, { MessagePayload } from './services/queue';
+import QueueService, { MessagePayload } from './services/messageQueue';
+import { ReminderQueueService } from './services/reminderQueue';
 import TelegramService from './services/telegram';
 
 const port = process.env.PORT || 11435;
@@ -12,8 +13,9 @@ const bot = TelegramService.getInstance();
 // Start the bot (this will initialize polling or webhook only once)
 TelegramService.startBot();
 
-// Initialize queue service
+// Initialize queue services
 const queueService = QueueService.getInstance();
+const reminderQueueService = ReminderQueueService.getInstance(); // Initialize reminder queue service
 
 // Register the function that will process messages from the queue
 queueService.registerMessageProcessor(async (payload: MessagePayload) => {
@@ -165,13 +167,13 @@ bot.on('error', (error) => {
 
 // Handle process termination
 process.on('SIGTERM', async () => {
-  console.log('SIGTERM received, closing queue...');
-  await queueService.close();
+  console.log('SIGTERM received, closing queues...');
+  await Promise.all([queueService.close(), reminderQueueService.close()]);
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
-  console.log('SIGINT received, closing queue...');
-  await queueService.close();
+  console.log('SIGINT received, closing queues...');
+  await Promise.all([queueService.close(), reminderQueueService.close()]);
   process.exit(0);
 });

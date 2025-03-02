@@ -6,14 +6,15 @@ import { MainGraphStateAnnotation, mainTools } from '../graphs/main.graph';
 export const responseAgentNode = async (
   state: typeof MainGraphStateAnnotation.State
 ): Promise<Partial<typeof MainGraphStateAnnotation.State>> => {
-  const { messages, summary, memory } = state;
+  const { messages, chatId, summary, memory } = state;
 
   const model = chatModel.bindTools(mainTools);
 
   // Create base system prompt
   let systemPrompt = PROMPTS.CHAT.SYSTEM;
 
-  systemPrompt += '\n\n<additional-context>\n';
+  systemPrompt += `\n\n<additional-context>
+Chat ID: ${chatId}`;
   // Add summary if available
   if (summary) {
     systemPrompt += `\n\nConversation Summary:\n${summary}`;

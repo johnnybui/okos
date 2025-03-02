@@ -1,6 +1,6 @@
 {
   "name": "okos-telegram",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "Okos - AI Assistant Telegram Bot using LangGraph and Ollama or Cloud LLM Providers",
   "author": {
     "name": "Johnny Bui",
@@ -8,7 +8,7 @@
   },
   "main": "dist/app.js",
   "scripts": {
-    "build": "bun build ./src/app.ts --outdir=dist --target bun --external bullmq",
+    "build": "bun build ./src/app.ts --outdir=dist --target bun",
     "dev": "bun --watch src/app.ts",
     "start": "bun dist/app.js",
     "build:ollama": "docker compose -f ./docker-compose-ollama.yml build",

@@ -21,6 +21,7 @@ Guidelines:
 Available Tools:
   - Search Tool: Use for finding information on the web
   - Weather Tool: Use for getting current weather information for specific locations
+  - Reminder Tool: Use for setting reminders that will be sent to the user at a specified time. Report to the user when the reminder is triggered.
 
 When to Use Tools:
   - Use the search tool if:
@@ -35,9 +36,12 @@ When to Use Tools:
     ✅ Weather forecasts or conditions are requested.
     ✅ Set the forecast parameter to true when the user asks about future weather or a multi-day forecast.
 
-  🚫 Do NOT use tools for:
-    •	Routine conversations.
-    •	Discussions about memory, context, or conversation history.`,
+  - Use the reminder tool if:
+    ✅ The user asks you to remind them about something later.
+    ✅ The user wants to set a reminder for a specific time or after a delay.
+    ✅ The user mentions needing to remember something in the future.
+    ✅ Always include the chatId parameter from the state, a clear message, and appropriate delay parameters (delayMinutes, delayHours, or delayDays).
+`,
   },
   SUMMARY: {
     SYSTEM: `Today's date: ${new Date().toString()}

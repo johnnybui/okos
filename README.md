@@ -13,6 +13,7 @@ Okos is a Telegram AI Assistant built with TypeScript, LangGraph, and multiple A
 - Multiple Images input support
 - Internet searching
 - Weather information retrieval (current conditions and 5-day forecasts)
+- Reminder system to set and receive notifications at specified times
 - Message queuing system with BullMQ to prevent overlapping workflows
 - Redis for state persistence and job queuing
 - Docker support for both local and cloud deployments
@@ -161,14 +162,38 @@ For cloud-based AI providers (OpenAI, Google, Groq):
 
 ## Message Queue System
 
-Okos uses BullMQ to implement a robust message processing system that ensures:
+Okos uses BullMQ to implement robust message processing and reminder systems that ensure:
 
 - Messages from the same user are processed sequentially
 - Multiple users can be served concurrently
 - The system can handle high loads without crashing
 - Failed jobs are properly retried and logged
+- Reminders are scheduled and delivered at the specified times
+
+The system implements two specialized queues:
+
+1. **Message Queue** - Handles incoming user messages and ensures sequential processing
+2. **Reminder Queue** - Manages scheduled reminders with precise timing using BullMQ's delayed job feature
 
 Detailed documentation about the queue system is available in the [Queue System Documentation](./docs/queue-system.md).
+
+## Available Tools
+
+Okos provides several tools that enhance the AI assistant's capabilities:
+
+1. **Search Tool** - Allows the bot to search the internet for up-to-date information
+   - Uses Tavily or Brave Search API to find relevant information
+   - Helps answer questions about current events, facts, and general knowledge
+
+2. **Weather Tool** - Provides weather information for any location
+   - Retrieves current weather conditions including temperature, humidity, and wind speed
+   - Can provide 5-day forecasts when requested
+   - Uses OpenWeatherMap API
+
+3. **Reminder Tool** - Sets reminders that will notify the user at specified times
+   - Users can request reminders for future events or tasks
+   - Supports flexible time specifications (minutes, hours, days)
+   - Uses BullMQ's delayed job feature for precise timing
 
 ## Model Configuration
 

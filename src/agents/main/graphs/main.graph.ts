@@ -8,10 +8,11 @@ import { pickRandomElement } from '../../../utils';
 import { memorizeAgentNode } from '../nodes/memorizeAgent.node';
 import { responseAgentNode } from '../nodes/responseAgent.node';
 import { summarizeAgentNode } from '../nodes/summarizeAgent.node';
+import { reminderTool } from '../tools/reminder.tool';
 import { searchTool } from '../tools/search.tool';
 import { weatherTool } from '../tools/weather.tool';
 
-export const mainTools = [searchTool, weatherTool];
+export const mainTools = [searchTool, weatherTool, reminderTool];
 let pendingActionMessage: TelegramBot.Message | undefined;
 
 const getNextRoute = async (state: typeof MainGraphStateAnnotation.State) => {
