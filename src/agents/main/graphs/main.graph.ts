@@ -21,7 +21,23 @@ const getNextRoute = async (state: typeof MainGraphStateAnnotation.State) => {
   const lastAIMessage = aiMessages[aiMessages.length - 1] as AIMessage;
 
   if (lastAIMessage?.tool_calls?.length) {
-    pendingActionMessage = await TelegramService.sendSticker(chatId, pickRandomElement(STICKER.SEARCHING));
+    let stateSticker = pickRandomElement(STICKER.WRITING);
+    if (lastAIMessage.tool_calls[0].name.includes('search')) {
+      stateSticker = pickRandomElement(STICKER.SEARCHING);
+    }
+    if (lastAIMessage.tool_calls[0].name.includes('weather')) {
+      stateSticker = pickRandomElement(STICKER.SEARCHING);
+    }
+    if (lastAIMessage.tool_calls[0].name.includes('reminder')) {
+      stateSticker = pickRandomElement(STICKER.WRITING);
+    }
+
+    if (pendingActionMessage) {
+      TelegramService.deleteMessage(chatId, pendingActionMessage.message_id);
+      pendingActionMessage = undefined;
+    }
+    pendingActionMessage = await TelegramService.sendSticker(chatId, stateSticker);
+
     return 'callTools';
   }
 
