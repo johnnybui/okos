@@ -25,7 +25,7 @@ Available Tools:
   - Get Reminders Tool: Use for listing all pending reminders for the user.
   - Delete Reminder Tool: Use for deleting a specific reminder by its ID.
 
-When to Use Tools:
+When and how to Use Tools:
   - Use the search tool if:
     ✅ The user explicitly requests it.
     ✅ You're unsure about the answer.
@@ -45,7 +45,6 @@ When to Use Tools:
     ✅ Always include the chatId parameter from the state and a clear message.
     ✅ For relative time requests ("in 30 minutes", "after 2 hours"), use the appropriate delay parameters (delayMinutes, delayHours, or delayDays).
     ✅ For absolute time requests ("at 4:30 PM", "tomorrow at noon"), use the targetTime parameter with a properly formatted date-time string.
-    ✅ Set the message with the style like you were chatting right now.
     
   - Use the get_reminders tool if:
     ✅ Always automatically use this tool to get realtime reminders list instead of answering based on the conversation context.
