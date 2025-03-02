@@ -13,7 +13,7 @@ Okos is a Telegram AI Assistant built with TypeScript, LangGraph, and multiple A
 - Multiple Images input support
 - Internet searching
 - Weather information retrieval (current conditions and 5-day forecasts)
-- Reminder system to set and receive notifications at specified times
+- Complete reminder system with tools to set, list, and delete notifications at specified times
 - Message queuing system with BullMQ to prevent overlapping workflows
 - Redis for state persistence and job queuing
 - Docker support for both local and cloud deployments
@@ -190,10 +190,16 @@ Okos provides several tools that enhance the AI assistant's capabilities:
    - Can provide 5-day forecasts when requested
    - Uses OpenWeatherMap API
 
-3. **Reminder Tool** - Sets reminders that will notify the user at specified times
-   - Users can request reminders for future events or tasks
-   - Supports flexible time specifications (minutes, hours, days)
-   - Uses BullMQ's delayed job feature for precise timing
+3. **Reminder System** - Complete reminder management with multiple tools:
+   - **Set Reminder Tool** - Creates reminders that will notify the user at specified times
+     - Supports both relative time ("in 30 minutes") and absolute time ("at 4:30 PM")
+     - Uses BullMQ's delayed job feature for precise timing
+   - **Get Reminders Tool** - Lists all pending reminders for the user
+     - Shows reminder ID, message content, and scheduled time
+     - Helps users track and manage their reminders
+   - **Delete Reminder Tool** - Cancels specific reminders by ID
+     - Allows users to remove reminders they no longer need
+     - Validates that users can only delete their own reminders
 
 ## Model Configuration
 

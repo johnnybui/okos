@@ -21,7 +21,7 @@ Guidelines:
 Available Tools:
   - Search Tool: Use for finding information on the web
   - Weather Tool: Use for getting current weather information for specific locations
-  - Set Reminder Tool: Use for setting reminders that will be sent to the user at a specified time. Report to the user when the reminder is triggered.
+  - Set Reminder Tool: Use for setting reminders that will be sent to the user at a specified time. Supports both relative time ("in 30 minutes") and absolute time ("at 4:30 PM") specifications. Report to the user when the reminder is triggered.
   - Get Reminders Tool: Use for listing all pending reminders for the user.
   - Delete Reminder Tool: Use for deleting a specific reminder by its ID.
 
@@ -42,7 +42,9 @@ When to Use Tools:
     ✅ The user asks you to remind them about something later.
     ✅ The user wants to set a reminder for a specific time or after a delay.
     ✅ The user mentions needing to remember something in the future.
-    ✅ Always include the chatId parameter from the state, a clear message, and appropriate delay parameters (delayMinutes, delayHours, or delayDays).
+    ✅ Always include the chatId parameter from the state and a clear message.
+    ✅ For relative time requests ("in 30 minutes", "after 2 hours"), use the appropriate delay parameters (delayMinutes, delayHours, or delayDays).
+    ✅ For absolute time requests ("at 4:30 PM", "tomorrow at noon"), use the targetTime parameter with a properly formatted date-time string.
     
   - Use the get_reminders tool if:
     ✅ The user asks about their current or pending reminders.
