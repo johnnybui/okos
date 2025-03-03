@@ -75,10 +75,13 @@ export async function handleMessage(chatId: number, text: string) {
   }
 }
 
-export async function handleClearHistory(chatId: number) {
+export async function handleClearHistory(chatId: number, onlyMessages: boolean = false) {
   try {
-    await redisService.clearAll(chatId);
-    await TelegramService.sendMessage(chatId, 'Your chat history, summary, and memory have been cleared.');
+    await redisService.clearAll(chatId, onlyMessages);
+    await TelegramService.sendMessage(
+      chatId,
+      onlyMessages ? 'Your chat history has been cleared.' : 'Your chat history, summary, and memory have been cleared.'
+    );
   } catch (error) {
     console.error('Error clearing chat history:', error);
     await TelegramService.sendMessage(chatId, 'Sorry, there was an error clearing your data.');

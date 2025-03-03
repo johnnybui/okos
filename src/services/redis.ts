@@ -271,15 +271,19 @@ export class RedisService {
   /**
    * Clear all data for a chat (messages, summary, and memory)
    */
-  async clearAll(chatId: number): Promise<void> {
+  async clearAll(chatId: number, onlyMessages: boolean = false): Promise<void> {
     try {
-      await Promise.all([
-        this.client.del(this.getMessagesKey(chatId)),
-        this.client.del(this.getSummaryKey(chatId)),
-        this.client.del(this.getMemoryKey(chatId)),
-        this.client.del(this.getSummaryCountdownKey(chatId)),
-        this.client.del(this.getMemoryCountdownKey(chatId)),
-      ]);
+      if (onlyMessages) {
+        await this.client.del(this.getMessagesKey(chatId));
+      } else {
+        await Promise.all([
+          this.client.del(this.getMessagesKey(chatId)),
+          this.client.del(this.getSummaryKey(chatId)),
+          this.client.del(this.getMemoryKey(chatId)),
+          this.client.del(this.getSummaryCountdownKey(chatId)),
+          this.client.del(this.getMemoryCountdownKey(chatId)),
+        ]);
+      }
     } catch (error) {
       console.error('Error clearing all data:', error);
     }
