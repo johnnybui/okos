@@ -17,7 +17,7 @@ export class AIService {
     const provider = MODEL_VISION_PROVIDER || MODEL_PROVIDER;
 
     if (provider === 'openai' || provider === 'ollama') {
-      const systemMessage = new SystemMessage(PROMPTS.VISION.SYSTEM);
+      const systemMessage = new SystemMessage(PROMPTS.VISION.SYSTEM());
       const humanMessage = new HumanMessage({
         content: [
           {
@@ -47,7 +47,7 @@ export class AIService {
             content: [
               {
                 type: 'text',
-                text: `${PROMPTS.VISION.SYSTEM}\n\n${PROMPTS.VISION.formatUserPrompt(question)}
+                text: `${PROMPTS.VISION.SYSTEM()}\n\n${PROMPTS.VISION.formatUserPrompt(question)}
 Tell user that we are only analyzing the first image`,
               },
               {
@@ -73,7 +73,7 @@ Tell user that we are only analyzing the first image`,
       );
       const imagesData = imagesBuffers.map((buffer) => Buffer.from(buffer).toString('base64'));
 
-      const systemMessage = new SystemMessage(PROMPTS.VISION.SYSTEM);
+      const systemMessage = new SystemMessage(PROMPTS.VISION.SYSTEM());
       const humanMessage = new HumanMessage({
         content: [
           {
