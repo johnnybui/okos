@@ -6,7 +6,7 @@ on:
 
 env:
   CI: true
-  DOCKER_IMAGE: ghcr.io/johnnybui/okos:latest,ghcr.io/johnnybui/okos:2,ghcr.io/johnnybui/okos:2.3.10
+  DOCKER_IMAGE: ghcr.io/johnnybui/okos:latest,ghcr.io/johnnybui/okos:2,ghcr.io/johnnybui/okos:2.3.11
 
 jobs:
   build:

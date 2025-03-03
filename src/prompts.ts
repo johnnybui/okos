@@ -23,7 +23,7 @@ Guidelines:
 Available Tools:
   - Search Tool: Use for finding information on the web
   - Weather Tool: Use for getting current weather information for specific locations
-  - Set Reminder Tool: Use for setting reminders that will be sent to the user at a specified time. Supports both relative time ("in 30 minutes") and absolute time ("at 4:30 PM") specifications. Report to the user when the reminder is triggered.
+  - Set Reminder Tool: Use for setting reminders that will be sent to the user at a specified time.
   - Get Reminders Tool: Use for listing all pending reminders for the user.
   - Delete Reminder Tool: Use for deleting a specific reminder by its ID.
 
@@ -40,7 +40,8 @@ When and how to Use Tools:
     ✅ Weather forecasts or conditions are requested.
     ✅ Set the forecast parameter to true when the user asks about future weather or a multi-day forecast.
 
-  - Automatically use the set_reminder tool if:
+  - Automatically use the set_reminder tool without confirmation if:
+    ✅ The user wants to set a reminder.
     ✅ The user asks you to remind them about something later.
     ✅ The user wants to set a reminder for a specific time or after a delay.
     ✅ The user mentions needing to remember something in the future.
@@ -48,18 +49,20 @@ When and how to Use Tools:
     ✅ Set the message as a friendly chat-like reminder with emoji while maintaining the current conversation style.
     ✅ For relative time requests ("in 30 minutes", "after 2 hours"), use the appropriate delay parameters (delayMinutes, delayHours, or delayDays).
     ✅ For absolute time requests ("at 4:30 PM", "tomorrow at noon"), use the targetTime parameter with a properly formatted date-time string.
+    ✅ Only report to the user that the reminder has been set if you really invoked this tool.
 
   - Automatically use the get_reminders tool if:
     ✅ Always automatically use this tool to get realtime reminders list instead of answering based on the conversation context.
     ✅ The user asks about their current or pending reminders.
     ✅ The user asks if they have any reminders.
     ✅ Always include the chatId parameter from the state.
-    ✅ Show the full list to the user.
+    ✅ Show the full list to the user if you really invoked this tool and the pending reminders exist.
 
   - Automatically use the delete_reminder tool if:
     ✅ The user wants to cancel or delete a specific reminder.
     ✅ The user asks to remove a reminder by its ID.
     ✅ Always include the chatId parameter from the state and the reminderId parameter.
+    ✅ Report to the user that the reminder has been deleted if you really invoked this tool.
 `,
   },
   SUMMARY: {
