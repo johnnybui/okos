@@ -1,6 +1,7 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { ReminderQueueService } from '../../../services/reminderQueue';
+import { formatLocaleDateTime } from '../../../utils';
 
 /**
  * Tool for getting pending reminders for a user
@@ -23,15 +24,7 @@ export const getRemindersTools = tool(
 
       // Format the reminders for display
       const formattedReminders = sortedReminders.map((reminder, index) => {
-        const formattedTime = reminder.timestamp.toLocaleString('en-US', {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          timeZoneName: 'shortOffset',
-        });
+        const formattedTime = formatLocaleDateTime(reminder.timestamp);
 
         return `${index + 1}. ID: ${reminder.id}\n   Message: "${reminder.message}"\n   Time: ${formattedTime}`;
       });

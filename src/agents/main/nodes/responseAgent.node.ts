@@ -11,7 +11,7 @@ export const responseAgentNode = async (
   const model = chatModel.bindTools(mainTools);
 
   // Create base system prompt
-  let systemPrompt = PROMPTS.CHAT.SYSTEM;
+  let systemPrompt = PROMPTS.CHAT.SYSTEM();
 
   systemPrompt += `\n\n<additional-context>
 Chat ID: ${chatId}`;

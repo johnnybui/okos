@@ -39,7 +39,7 @@ export const summarizeAgentNode = async (
       .join('\n\n');
 
     // Create system message with the summary prompt
-    const systemMessage = new SystemMessage(PROMPTS.SUMMARY.SYSTEM);
+    const systemMessage = new SystemMessage(PROMPTS.SUMMARY.SYSTEM());
 
     // Format the user prompt with previous summary and new messages
     const userPrompt = PROMPTS.SUMMARY.formatUserPrompt(previousSummary, messagesText);

@@ -1,3 +1,5 @@
+import { format, formatISO } from 'date-fns';
+
 // Headings H1-H6.
 const h1 = /(^|\n) {0,3}#{1,6} {1,8}[^\n]{1,64}\r?\n\r?\n\s{0,32}\S/;
 
@@ -47,4 +49,22 @@ export const isMarkdown = (src: string): boolean =>
 
 export function pickRandomElement<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];
+}
+
+export function formatLocaleDateTime(date: Date) {
+  // Format the date part as "Mon, 03-Mar-2025"
+  const datePart = format(date, 'EEE, dd-MMM-yyyy');
+  
+  // Format the time part as "7:08:16 AM"
+  const timePart = format(date, 'h:mm:ss a');
+  
+  // Get the timezone offset (e.g., "GMT+7")
+  const timeZoneOffset = formatISO(date).slice(-6);
+  const offsetHours = parseInt(timeZoneOffset.substring(1, 3));
+  const formattedOffset = timeZoneOffset.startsWith('+') 
+    ? `GMT+${offsetHours}` 
+    : `GMT-${offsetHours}`;
+  
+  // Combine all parts
+  return `${datePart} at ${timePart} ${formattedOffset}`;
 }

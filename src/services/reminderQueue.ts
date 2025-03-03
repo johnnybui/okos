@@ -1,5 +1,6 @@
 import { Job, Queue, Worker } from 'bullmq';
 import { QUEUE_CONFIG } from '../config';
+import { formatLocaleDateTime } from '../utils';
 import { RedisService } from './redis';
 import TelegramService from './telegram';
 
@@ -76,7 +77,10 @@ export class ReminderQueueService {
     try {
       // Send reminder message to the user
       await TelegramService.sendMessage(chatId, message);
-      await redisService.saveAIMessage(chatId, message);
+      await redisService.saveAIMessage(
+        chatId,
+        message + `\n\n[metadata.remindedAt: ${formatLocaleDateTime(new Date())}]`
+      );
 
       if (process.env.ENV === 'debug') {
         console.log(`Sent reminder to chat ${chatId}: ${message}`);

@@ -1,6 +1,7 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { ReminderQueueService } from '../../../services/reminderQueue';
+import { formatLocaleDateTime } from '../../../utils';
 
 /**
  * Tool for setting reminders that will be sent to the user at a specified time
@@ -49,15 +50,7 @@ export const setReminderTool = tool(
       });
 
       // Format the reminder time for the response
-      const formattedTime = reminderTime.toLocaleString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        timeZoneName: 'shortOffset',
-      });
+      const formattedTime = formatLocaleDateTime(reminderTime);
 
       return `Reminder set successfully! I'll remind you about "${message}" on ${formattedTime}.`;
     } catch (error) {
@@ -75,7 +68,9 @@ export const setReminderTool = tool(
       chatId: z.number().describe('The chat ID of the chat where the user are chatting with the you.'),
       message: z
         .string()
-        .describe('The friendly, chat-like reminder message to the user. Maintain the current conversation style and use suitable emoji.'),
+        .describe(
+          'The friendly, chat-like reminder message to the user. Maintain the current conversation style and use suitable emoji.'
+        ),
       delayMinutes: z
         .number()
         .optional()

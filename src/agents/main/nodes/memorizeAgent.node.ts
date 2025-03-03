@@ -39,7 +39,7 @@ export const memorizeAgentNode = async (
       .join('\n\n');
 
     // Create system message with the memory prompt
-    const systemMessage = new SystemMessage(PROMPTS.MEMORY.SYSTEM);
+    const systemMessage = new SystemMessage(PROMPTS.MEMORY.SYSTEM());
 
     // Format the user prompt with existing memory and new messages
     const userPrompt = PROMPTS.MEMORY.formatUserPrompt(existingMemory, messagesText);

@@ -1,6 +1,7 @@
 import { AIMessage, BaseMessage, HumanMessage } from '@langchain/core/messages';
 import Redis from 'ioredis';
 import { CHAT_CONFIG, REDIS_URL } from '../config';
+import { formatLocaleDateTime } from '../utils';
 
 export interface ChatState {
   messages: BaseMessage[];
@@ -119,12 +120,16 @@ export class RedisService {
       return rawMessages.map((rawMessage) => {
         const message = JSON.parse(rawMessage);
         if (message.type === 'human') {
-          return new HumanMessage(message.content, { messageTime: new Date(message.timestamp).toString() });
+          return new HumanMessage(
+            message.content + `\n\n[metadata.sentAt: ${formatLocaleDateTime(new Date(message.timestamp))}]`
+          );
         } else if (message.type === 'ai') {
-          return new AIMessage(message.content, { messageTime: new Date(message.timestamp).toString() });
+          return new AIMessage(message.content);
         }
         // Default to human message if type is unknown
-        return new HumanMessage(message.content, { messageTime: new Date(message.timestamp).toString() });
+        return new HumanMessage(
+          message.content + `\n\n[metadata.sentAt: ${formatLocaleDateTime(new Date(message.timestamp))}]`
+        );
       });
     } catch (error) {
       console.error('Error getting messages:', error);
