@@ -3,6 +3,8 @@ import { QUEUE_CONFIG } from '../config';
 import { RedisService } from './redis';
 import TelegramService from './telegram';
 
+const redisService = new RedisService();
+
 // Reminder payload type
 export type ReminderPayload = {
   chatId: number;
@@ -74,6 +76,7 @@ export class ReminderQueueService {
     try {
       // Send reminder message to the user
       await TelegramService.sendMessage(chatId, message);
+      await redisService.saveAIMessage(chatId, message);
 
       if (process.env.ENV === 'debug') {
         console.log(`Sent reminder to chat ${chatId}: ${message}`);

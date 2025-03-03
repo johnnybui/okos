@@ -43,6 +43,7 @@ const getNextRoute = async (state: typeof MainGraphStateAnnotation.State) => {
       pendingActionMessage = undefined;
     }
     pendingActionMessage = await TelegramService.sendSticker(chatId, stateSticker);
+    TelegramService.sendChatAction(chatId, 'typing');
 
     return 'callTools';
   }

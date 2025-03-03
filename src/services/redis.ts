@@ -119,12 +119,12 @@ export class RedisService {
       return rawMessages.map((rawMessage) => {
         const message = JSON.parse(rawMessage);
         if (message.type === 'human') {
-          return new HumanMessage(message.content);
+          return new HumanMessage(message.content, { messageTime: new Date(message.timestamp).toString() });
         } else if (message.type === 'ai') {
-          return new AIMessage(message.content);
+          return new AIMessage(message.content, { messageTime: new Date(message.timestamp).toString() });
         }
         // Default to human message if type is unknown
-        return new HumanMessage(message.content);
+        return new HumanMessage(message.content, { messageTime: new Date(message.timestamp).toString() });
       });
     } catch (error) {
       console.error('Error getting messages:', error);
