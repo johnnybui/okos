@@ -73,7 +73,8 @@ Instructions:
 2. Focus on key points, decisions, and important context
 3. Maintain chronological order of important events
 4. For lists, avoid special characters that conflict with Markdown, such as *, to prevent formatting errors. Use numbers (e.g., 1., 2., 3.) or plain text (e.g., "-", "+") instead.
-5. Output maximum about 10 bullet points, always have the last bullet point to tell about the current unresolved inquiry. Keep the summary concise but informative, not too long for a LLM system prompt`,
+5. Exclude any information about setting or searching reminders
+6. Output maximum about 10 bullet points, always have the last bullet point to tell about the current unresolved inquiry. Keep the summary concise but informative, not too long for a LLM system prompt`,
 
     formatUserPrompt: (lastSummary: string | undefined, messages: string) =>
       `${
@@ -96,7 +97,8 @@ Instructions:
 4. For lists, avoid special characters that conflict with Markdown, such as *, to prevent formatting errors. Use numbers (e.g., 1., 2., 3.) or plain text (e.g., "-", "+") instead.
 5. Keep only truly important, long-term relevant information
 6. Exclude temporary, large generated code/response or contextual information that belongs in the summary
-7. Output maximum 10 bullet points to stay focused on key information`,
+7. Exclude any information about setting or searching reminders
+8. Output maximum 10 bullet points to stay focused on key information`,
 
     formatUserPrompt: (existingMemory: string | undefined, messages: string) =>
       `${

@@ -58,10 +58,14 @@ new Elysia()
   });
 
 // Set up command handlers
-bot.setMyCommands([
-  { command: 'clearMessages', description: 'Clear your chat history' },
-  { command: 'clearAll', description: 'Clear your chat history and memory' },
-]);
+bot
+  .setMyCommands([
+    { command: 'clearMessages', description: 'Clear your chat history' },
+    { command: 'clearAll', description: 'Clear your chat history and memory' },
+  ])
+  .catch((error) => {
+    console.error('Error setting commands:', error);
+  });
 
 bot.on('text', async (msg) => {
   const chatId = msg.chat.id;
