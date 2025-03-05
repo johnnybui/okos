@@ -1,8 +1,8 @@
-import { AIMessage, BaseMessage, filterMessages } from '@langchain/core/messages';
+import { BaseMessage, isAIMessage } from '@langchain/core/messages';
 import { Annotation, END, START, StateGraph } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import TelegramBot from 'node-telegram-bot-api';
-import { STICKER } from '../../../config';
+import { redisService, STICKER } from '../../../config';
 import TelegramService from '../../../services/telegram';
 import { pickRandomElement } from '../../../utils';
 import { memorizeAgentNode } from '../nodes/memorizeAgent.node';
@@ -19,21 +19,38 @@ let pendingActionMessage: TelegramBot.Message | undefined;
 
 const getNextRoute = async (state: typeof MainGraphStateAnnotation.State) => {
   const { messages, chatId } = state;
-  const aiMessages = filterMessages(messages, { includeTypes: ['ai'] });
-  const lastAIMessage = aiMessages[aiMessages.length - 1] as AIMessage;
 
-  if (lastAIMessage?.tool_calls?.length) {
+  const lastMessage = messages[messages.length - 1];
+  if (!isAIMessage(lastMessage)) return 'end';
+
+  if (lastMessage?.tool_calls?.length) {
+    let midWorkflowResponse: string | undefined;
+
+    // Parse the AI message for both text and complex array to send mid workflow response
+    if (typeof lastMessage.content === 'string') {
+      midWorkflowResponse = lastMessage.content;
+    } else if (Array.isArray(lastMessage.content)) {
+      midWorkflowResponse = (lastMessage.content as any[]).filter((c) => c.type === 'text')[0]?.text ?? undefined;
+    }
+
+    if (midWorkflowResponse) {
+      await redisService.saveAIMessage(chatId, midWorkflowResponse);
+      await TelegramService.sendMessage(chatId, midWorkflowResponse);
+      TelegramService.sendChatAction(chatId, 'typing');
+    }
+
+    // Send mid workflow state sticker
     let stateSticker = pickRandomElement(STICKER.WRITING);
-    if (lastAIMessage.tool_calls[0].name.includes('search')) {
+    if (lastMessage.tool_calls[0].name.includes('search')) {
       stateSticker = pickRandomElement(STICKER.SEARCHING);
     }
-    if (lastAIMessage.tool_calls[0].name.includes('weather')) {
+    if (lastMessage.tool_calls[0].name.includes('weather')) {
       stateSticker = pickRandomElement(STICKER.SEARCHING);
     }
     if (
-      lastAIMessage.tool_calls[0].name.includes('set_reminder') ||
-      lastAIMessage.tool_calls[0].name.includes('get_reminders') ||
-      lastAIMessage.tool_calls[0].name.includes('delete_reminder')
+      lastMessage.tool_calls[0].name.includes('set_reminder') ||
+      lastMessage.tool_calls[0].name.includes('get_reminders') ||
+      lastMessage.tool_calls[0].name.includes('delete_reminder')
     ) {
       stateSticker = pickRandomElement(STICKER.WRITING);
     }

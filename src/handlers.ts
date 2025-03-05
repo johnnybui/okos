@@ -1,4 +1,4 @@
-import { HumanMessage, trimMessages } from '@langchain/core/messages';
+import { HumanMessage, isAIMessage, trimMessages } from '@langchain/core/messages';
 import { ChatOpenAI } from '@langchain/openai';
 import TelegramBot from 'node-telegram-bot-api';
 import { mainGraph } from './agents/main/graphs/main.graph';
@@ -54,15 +54,27 @@ export async function handleMessage(chatId: number, text: string) {
     );
 
     // Get the AI response from the result
-    if (result.messages && result.messages.length > 0) {
-      const lastMessage = result.messages[result.messages.length - 1];
-      const aiResponse = lastMessage.content.toString();
+    if (result.messages?.length) {
+      const lastMessage = result.messages.slice(-1)[0];
+      if (isAIMessage(lastMessage)) {
+        const aiMessage = lastMessage.content;
+        let aiResponse: string | undefined;
 
-      // Send the AI response to the user
-      await TelegramService.sendMessage(chatId, aiResponse);
+        // Parse the AI message for both text and complex array
+        if (typeof aiMessage === 'string') {
+          aiResponse = aiMessage;
+        } else if (Array.isArray(aiMessage)) {
+          aiResponse = (aiMessage as any[]).filter((c) => c.type === 'text')[0]?.text ?? undefined;
+        }
 
-      // Save the AI response to Redis
-      await redisService.saveAIMessage(chatId, aiResponse);
+        if (aiResponse) {
+          // Save the AI response to Redis
+          await redisService.saveAIMessage(chatId, aiResponse);
+
+          // Send the AI response to the user
+          await TelegramService.sendMessage(chatId, aiResponse);
+        }
+      }
     }
   } catch (error: any) {
     console.error('Error processing message:', error);
