@@ -1,3 +1,4 @@
+import { html } from '@elysiajs/html';
 import { Elysia } from 'elysia';
 import TelegramBot from 'node-telegram-bot-api';
 import { handleClearHistory, handleMessage, handlePhoto } from './handlers';
@@ -36,17 +37,30 @@ queueService.registerMessageProcessor(async (payload: MessagePayload) => {
 });
 
 new Elysia()
+  .use(html())
   .get('/', async () => {
+    const renderHtml = (body: string) => `
+<html lang='en'>
+  <head>
+      <title>Okos - Telegram AI Bot</title>
+  </head>
+  <body>
+      ${body}
+  </body>
+</html>`;
+
     try {
       const isPolling = await bot.isPolling();
       const botUser = await bot.getMe();
 
-      return `<a href="https://t.me/${botUser.username}">${botUser.username}</a> is online!<br />Mode: ${
+      return renderHtml(`
+      <a href="https://t.me/${botUser.username}">${botUser.username}</a> is online!<br />Mode: ${
         isPolling ? 'Polling' : 'Webhook'
-      }`;
+      }
+      `);
     } catch (error) {
       console.error('Error in root route:', error);
-      return 'Bot is starting up. Please try again in a moment.';
+      return renderHtml('Bot is starting up. Please try again in a moment.');
     }
   })
   .post('/webhook', ({ body }: { body: TelegramBot.Update }) => {

@@ -19,6 +19,7 @@
     "down:cloud": "docker compose -f ./docker-compose-cloud.yml down"
   },
   "dependencies": {
+    "@elysiajs/html": "^1.2.0",
     "@langchain/community": "^0.3.18",
     "@langchain/core": "^0.3.23",
     "@langchain/google-genai": "^0.1.5",
