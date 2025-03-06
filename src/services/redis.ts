@@ -18,6 +18,7 @@ export class RedisService {
   private readonly summaryPrefix = 'summary:';
   private readonly messagesPrefix = 'messages:';
   private readonly memoryPrefix = 'memory:';
+  private readonly authorizedUsersKey = 'authorized_users';
 
   constructor() {
     if (!RedisService.redisConnection) {
@@ -286,6 +287,55 @@ export class RedisService {
       }
     } catch (error) {
       console.error('Error clearing all data:', error);
+    }
+  }
+
+  /**
+   * Check if a user is authorized
+   */
+  async isUserAuthorized(username: string): Promise<boolean> {
+    try {
+      if (!username) return false;
+      return await this.client.sismember(this.authorizedUsersKey, username) === 1;
+    } catch (error) {
+      console.error('Error checking user authorization:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Add a user to the authorized users list
+   */
+  async addAuthorizedUser(username: string): Promise<void> {
+    try {
+      if (!username) return;
+      await this.client.sadd(this.authorizedUsersKey, username);
+    } catch (error) {
+      console.error('Error adding authorized user:', error);
+    }
+  }
+
+  /**
+   * Remove a user from the authorized users list
+   */
+  async removeAuthorizedUser(username: string): Promise<void> {
+    try {
+      if (!username) return;
+      await this.client.srem(this.authorizedUsersKey, username);
+    } catch (error) {
+      console.error('Error removing authorized user:', error);
+    }
+  }
+
+  /**
+   * Get all authorized users
+   */
+  async getAuthorizedUsers(): Promise<string[]> {
+    try {
+      return await this.client.smembers(this.authorizedUsersKey);
+    } catch (error) {
+      console.error('Error getting authorized users:', error);
+      return [];
     }
   }
 }

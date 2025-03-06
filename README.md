@@ -16,6 +16,7 @@ Okos is a Telegram AI Assistant built with TypeScript, LangGraph, and multiple A
 - Complete reminder system with tools to set, list, and delete notifications at specified times
 - Message queuing system with BullMQ to prevent overlapping workflows
 - Redis for state persistence and job queuing
+- User authentication system with token-based access control
 - Docker support for both local and cloud deployments
 
 ## Prerequisites
@@ -58,6 +59,8 @@ cp .env.docker.example .env.docker
 4. Configure environment variables in `.env` or `.env.docker`:
 
 - `TELEGRAM_BOT_TOKEN`: Your Telegram bot token
+- `OKOS_TOKEN`: Access token for user authentication
+- `OKOS_ADMIN_USERNAME`: Telegram username of the admin user
 - `MODEL_PROVIDER`: Choose from 'ollama', 'google', 'groq', or 'openai'
 - Provider-specific API keys and model names
 - Redis URL
@@ -123,6 +126,8 @@ For cloud-based AI providers (OpenAI, Google, Groq):
 ### Required
 
 - `TELEGRAM_BOT_TOKEN`: Telegram Bot token
+- `OKOS_TOKEN`: Access token for user authentication
+- `OKOS_ADMIN_USERNAME`: Telegram username of the admin user
 - `MODEL_PROVIDER`: AI model provider ('ollama', 'google', 'groq', or 'openai')
 - `SEARCH_PROVIDER`: Search provider ('tavily' or 'brave')
 - `TAVILY_API_KEY`: Tavily API key for internet searching
@@ -200,6 +205,28 @@ Okos provides several tools that enhance the AI assistant's capabilities:
    - **Delete Reminder Tool** - Cancels specific reminders by ID
      - Allows users to remove reminders they no longer need
      - Validates that users can only delete their own reminders
+
+## Authentication System
+
+Okos includes a robust authentication system to control who can access and use the bot:
+
+1. **Token-based Authentication**
+   - New users must provide the correct access token (`OKOS_TOKEN`) to use the bot
+   - Once authenticated, usernames are stored in Redis for persistent access
+   - Unauthorized users receive a prompt to enter the token
+
+2. **Admin Controls**
+   - Admin user (defined by `OKOS_ADMIN_USERNAME`) has special privileges
+   - Admin commands:
+     - `/list_users` - View all authorized users
+     - `/remove_user <username>` - Remove a user's access
+
+3. **Command Access**
+   - Basic commands like `/clear_messages` and `/clear_all` are available to all users
+   - Admin commands are restricted to the designated admin user
+   - All other bot features require authentication
+
+This system ensures that only authorized users can interact with your bot while providing administrative tools to manage access.
 
 ## Model Configuration
 
