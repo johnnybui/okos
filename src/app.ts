@@ -48,7 +48,7 @@ async function authGuard(username: string | undefined, chatId: number, userInput
   }
 
   // User is not authorized, send authentication message
-  await bot.sendMessage(chatId, 'You are not authorized to use this bot. Please enter the access token to continue.');
+  await bot.sendMessage(chatId, 'You are not authorized to use this bot. Please enter the access token to continue. Make sure you have set a Telegram Username before enter it.');
   return false;
 }
 
